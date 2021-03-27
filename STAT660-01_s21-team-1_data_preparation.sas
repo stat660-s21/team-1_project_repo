@@ -1,7 +1,86 @@
 *******************************************************************************;
-**************** 80-character banner for column width reference ***************;
-* (set window width to banner width to calibrate line length to 80 characters *;
 *******************************************************************************;
+
+
+
+/*
+[Dataset 1 Name] elsch19
+
+[Dataset Description] English Learners by Grade and Language, AY2018-19
+
+[Experimental Unit Description] California schools in AY2018-19
+
+[Number of Observations] 62,911   
+
+[Number of Features] 21
+
+[Data Source] http://dq.cde.ca.gov/dataquest/dlfile/dlfile.aspx?cLevel=School&cYear=2018-19&cCat=EL&cPage=fileselsch
+
+[Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/fselsch.asp
+
+[Unique ID Schema] The column CDS is a unique id.
+
+***
+
+[Dataset 2 Name] fepsch19
+
+[Dataset Description] Fluent-English Proficient Students by Grade and Language,
+AY2018-19
+
+[Experimental Unit Description] California schools in AY2018-19
+
+[Number of Observations] 76,171
+
+[Number of Features] 21
+
+[Data Source] http://dq.cde.ca.gov/dataquest/dlfile/dlfile.aspx?cLevel=School&cYear=2018-19&cCat=FEP&cPage=filesfepsch
+
+[Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesfepsch.asp
+
+[Unique ID Schema] The column CDS is a unique id.
+
+***
+
+[Dataset 3 Name] ELAS/LTEL/AT-Risk Data
+
+[Dataset Description] Enrollment by ELAS, LTEL, and At-Risk by Grade, AY2018-19
+
+[Experimental Unit Description] California schools in AY2018-19
+
+[Number of Observations] 210,816
+
+[Number of Features] 24
+
+[Data Source] http://dq.cde.ca.gov/dataquest/longtermel/lteldnld.aspx?year=2018-19
+
+[Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesltel.asp
+
+[Unique ID Schema] The columns "County Code", "District Code", and "School Code"
+form a composite key, which together are equivalent to the unique id column CDS
+in dataset fepsch19 and dataset elsch19.
+
+***
+
+[Dataset 4 Name] chronicabsenteeism19
+
+[Dataset Description] Chronic Absenteeism Data, AY2018-19
+
+[Experimental Unit Description] California schools in AY2018-19
+
+[Number of Observations] 239,810
+
+[Number of Features] 14
+
+[Data Source] https://www3.cde.ca.gov/demo-downloads/attendance/chrabs1819.txt
+
+[Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesabd.asp
+
+[Unique ID Schema] The columns "County Code", "District Code", and "School Code"
+form a composite key, which together are equivalent to the unique id column CDS 
+in dataset elsch19 and dataset fepsch19.
+
+*/
+
 
 /*
 create macro variable with path to directory where this file is located,
@@ -13,48 +92,33 @@ enabling relative imports
 execute data-prep file, which will generate final analytic dataset used to
 answer the research questions below
 */
-%include "&path.STAT660-01_s21-team-0_data_preparation.sas";
+%include "&path.STAT660-01_s21-team-1_data_preparation.sas";
 
 
-*******************************************************************************;
-* Research Question 1 Analysis Starting Point;
-*******************************************************************************;
-/*
-Question 1 of 3: What are the top five schools that experienced the biggest
-increase in "Percent (%) Eligible Free (K-12)" between AY2014-15 and AY2015-16?
-Rationale: This should help identify schools to consider for new outreach based
-upon increasing child-poverty levels.
-Note: This compares the column "Percent (%) Eligible Free (K-12)" from frpm1415
-to the column of the same name from frpm1516.
-*/
+filename csvFile 
+	url "https://github.com/stat660/team-1_project_repo/raw/main/data/fepsch19.csv";
 
+proc import datafile=csvFile 
+	out=fep replace dbms=csv; 
+run;
 
-*******************************************************************************;
-* Research Question 2 Analysis Starting Point;
-*******************************************************************************;
-/*
-Question 2 of 3: Can "Percent (%) Eligible FRPM (K-12)" be used to predict the
-proportion of high school graduates earning a combined score of at least 1500
-on the SAT?
-Rationale: This would help inform whether child-poverty levels are associated
-with college-preparedness rates, providing a strong indicator for the types of
-schools most in need of college-preparation outreach.
-Note: This compares the column "Percent (%) Eligible Free (K-12)" from frpm1415
-to the column PCTGE1500 from sat15.
-*/
+filename csvFile 
+	url "https://github.com/stat660/team-1_project_repo/raw/main/data/elsch19.csv";
 
+proc import datafile=csvFile 
+	out=els replace dbms=csv; 
+run;
 
-*******************************************************************************;
-* Research Question 3 Analysis Starting Point;
-*******************************************************************************;
-/*
-Question 3 of 3: What are the top ten schools were the number of high school
-graduates taking the SAT exceeds the number of high school graduates completing
-UC/CSU entrance requirements?
-Rationale: This would help identify schools with significant gaps in
-preparation specific for California's two public university systems, suggesting
-where focused outreach on UC/CSU college-preparation might have the greatest
-impact.
-Note: This compares the column NUMTSTTAKR from sat15 to the column TOTAL from
-gradaf15.
-*/
+filename csvFile 
+	url "https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.csv";
+
+proc import datafile=csvFile 
+	out=ch_abs replace dbms=csv; 
+run;
+
+filename csvFile 
+	url "https://github.com/stat660/team-1_project_repo/raw/main/data/ELASatrisk.csv";
+
+proc import datafile=csvFile 
+	out=elas replace dbms=csv; 
+run;
