@@ -13,7 +13,7 @@ enabling relative imports
 execute data-prep file, which will generate final analytic dataset used to
 answer the research questions below
 */
-%include "&path.STAT660-01_s21-team-0_data_preparation.sas";
+%include "&path.STAT660-01_s21-team-1_data_preparation.sas";
 
 
 *******************************************************************************;
