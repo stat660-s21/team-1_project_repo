@@ -1,6 +1,5 @@
 *******************************************************************************;
-**************** 80-character banner for column width reference ***************;
-* (set window width to banner width to calibrate line length to 80 characters *;
+******************** Project analysis *****************************************; 
 *******************************************************************************;
 
 /* 
@@ -147,26 +146,6 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
 %mend;
 %loadDatasets
 
-/*
-Note to learners [which is not part of this example/template]: The example below
-illustrates how much work SAS does behind the scenes when a new dataset is
-created. By default, SAS datasets are stored on disk as physical files, which
-you could view by locating in folders called "libraries," with the default
-"Work" library located in a temporary location typically not accessible to the
-end user. In addition, SAS dataset files can be optimized in numerous ways,
-including encryption, compression, and indexing. This reflects SAS having been
-created in the 1960s, when computer resources were extremely limited, and so it
-made sense to store even small datasets on disk and load them into memory one
-record/row at a time, as needed.
-
-By contract, most modern languages, like R and Python, store datasets in memory
-by default. This has several trade-offs: Since DataFrames in R and Python are in
-memory, any of their elements can be accessed simultaneously, making data
-transformations fast and flexible, but DataFrames cannot be larger than
-available system memory. On the other hand, SAS datasets can be arbitrarily
-large, but large datasets often take longer to process since they must be
-streamed to memory from disk and then operated on one record at a time.
-*/
 
 /*
 print the names of all datasets/tables created above by querying the
