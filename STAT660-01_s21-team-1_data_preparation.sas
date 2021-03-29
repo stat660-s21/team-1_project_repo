@@ -1,6 +1,6 @@
 *******************************************************************************;
-**************** 80-character banner for column width reference ***************;
-* (set window width to banner width to calibrate line length to 80 characters *;
+******************** Project analysis *****************************************; 
+******************** Data Preparation *****************************************;
 *******************************************************************************;
 
 /* 
@@ -21,6 +21,7 @@
 [Unique ID Schema] The column CDS is a unique id.
 
 */
+
 %let inputDataset1DSN = elsch19_raw;
 %let inputDataset1URL = 
 https://github.com/stat660/team-1_project_repo/raw/main/data/elsch19.csv
@@ -31,7 +32,8 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/elsch19.csv
 /*
 [Dataset 2 Name] fepsch19
 
-[Dataset Description] Fluent-English Proficient Students by Grade and Language, AY2018-19
+[Dataset Description] Fluent-English Proficient Students by Grade and Language, 
+AY2018-19
 
 [Experimental Unit Description] California schools in AY2018-19
 
@@ -46,6 +48,7 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/elsch19.csv
 [Unique ID Schema] The column CDS is a unique id.
 
 */
+
 %let inputDataset2DSN = fepsch19_raw;
 %let inputDataset2URL = 
 https://github.com/stat660/team-1_project_repo/raw/main/data/fepsch19.csv
@@ -64,13 +67,17 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/fepsch19.csv
                     
 [Number of Features] 24
 
-[Data Source] http://dq.cde.ca.gov/dataquest/longtermel/lteldnld.aspx?year=2018-19
+[Data Source] 
+http://dq.cde.ca.gov/dataquest/longtermel/lteldnld.aspx?year=2018-19
 
 [Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesltel.asp
 
-[Unique ID Schema] The columns "County Code", "District Code", and "School Code" form a composite key, which together are equivalent to the unique id column CDS in dataset fepsch19 and dataset elsch19.
+[Unique ID Schema] The columns "County Code", "District Code", and "School Code" 
+form a composite key, which together are equivalent to the unique id column CDS 
+in dataset fepsch19 and dataset elsch19.
 
 */
+
 %let inputDataset3DSN = ELASatrisk_raw;
 %let inputDataset3URL = 
 https://github.com/stat660/team-1_project_repo/raw/main/data/ELASatrisk.csv
@@ -93,9 +100,12 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/ELASatrisk.csv
 
 [Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesabd.asp
 
-[Unique ID Schema] The columns "County Code", "District Code", and "School Code" form a composite key, which together are equivalent to the unique id column CDS in dataset elsch19 and dataset fepsch19.
+[Unique ID Schema] The columns "County Code", "District Code", and "School Code" 
+form a composite key, which together are equivalent to the unique id column CDS 
+in dataset elsch19 and dataset fepsch19.
 
 */
+
 %let inputDataset4DSN = chronicabsenteeism_raw;
 %let inputDataset4URL = 
 https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.csv
