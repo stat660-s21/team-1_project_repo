@@ -156,15 +156,3 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
     %end;
 %mend;
 %loadDatasets
-
-
-/*
-print the names of all datasets/tables created above by querying the
-"dictionary tables" the SAS kernel maintains for the default "Work" library
-*/
-proc sql;
-    select *
-    from dictionary.tables
-    where libname = 'WORK'
-    order by memname;
-quit;
