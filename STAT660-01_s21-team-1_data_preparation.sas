@@ -230,8 +230,8 @@ run;
 
 /*
 This code checks the fepsch19_raw dataset for missing key values and removes
-them. Then it sorts by COUNTY, DISTRICT, SCHOOL, and then LANGUAGE. The 
-four features were all necessary to create a compostire key for this set. 
+them. Then it sorts by COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four features
+were all necessary to create a compostire key for this set. 
 */
 
 options firstobs=1;
