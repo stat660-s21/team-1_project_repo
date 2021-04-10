@@ -226,8 +226,6 @@ proc sort
 run;
 
 
-a small change
-
 /*
 This code checks the fepsch19_raw dataset for missing key values and removes
 them. Then it sorts by COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four features
