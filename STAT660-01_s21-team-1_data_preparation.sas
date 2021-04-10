@@ -161,11 +161,12 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
 
 
 /*
-This code checks the elsch19_raw dataset for missing key values and removes
-them. Then it sorts by COUNTY, DISTRICT, SCHOOL, and then LANGUAGE. The 
-four features were all necessary to create a compostire key for this set. 
+This code checks the elsch19_raw dataset for missing key values and removes 
+them. The composite key is COUNTY, DISTRICT, SCHOOL, and then LANGUAGE. The four
+features were all necessary to create a compostire key for this set. 
 */
 
+options firstobs=1;
 options OBS=max;
 proc sort
         nodupkey
@@ -186,18 +187,19 @@ proc sort
     by
 		COUNTY
 		DISTRICT
-        SCHOOL
+		SCHOOL
 		LANGUAGE
     ;
 run;
 
 
 /*
-This code checks the fepsch19_raw dataset for missing key values and removes
-them. Then it sorts by COUNTY, DISTRICT, SCHOOL, and then LANGUAGE. The 
-four features were all necessary to create a compostire key for this set. 
+This code checks the fepsch19_raw dataset for missing key values and removes 
+them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four 
+features were all necessary to create a compostire key for this set. 
 */
 
+options firstobs=1;
 options OBS=max;
 proc sort
         nodupkey
@@ -218,7 +220,7 @@ proc sort
     by
 		COUNTY
 		DISTRICT
-        SCHOOL
+		SCHOOL
 		LANGUAGE
     ;
 run;
@@ -255,7 +257,7 @@ proc sort
     by
 		COUNTYCODE
 		DISTRICTCODE
-        SCHOOLCODE
+		SCHOOLCODE
 		GRADE
 		GENDER
     ;
