@@ -253,6 +253,7 @@ proc sort
         not(missing(GENDER))
     ;
     by
+	/* this key removes around half of the data: needs revision */ 
 		COUNTYCODE
 		DISTRICTCODE
 		SCHOOLCODE
