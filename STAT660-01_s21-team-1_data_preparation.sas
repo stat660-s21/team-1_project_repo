@@ -113,7 +113,7 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
 %let inputDataset4Type = CSV;
 
 
-/* load raw datasets over the wire, if they doesn't already exist */
+/* load raw datasets over the wire, if they don't already exist */
 %macro loadDataIfNotAlreadyAvailable(dsn,url,filetype);
     %put &=dsn;
     %put &=url;
@@ -156,3 +156,126 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
     %end;
 %mend;
 %loadDatasets
+
+
+
+
+/*
+This code checks the elsch19_raw dataset for missing key values and removes
+them. Then it sorts by COUNTY, DISTRICT, SCHOOL, and then LANGUAGE. The 
+four features were all necessary to create a compostire key for this set. 
+*/
+
+options OBS=max;
+proc sort
+        nodupkey
+        data=elsch19_raw
+        dupout=elsch19_raw_dups
+        out=elsch19_raw_no_dups
+    ;
+    where
+        /* remove rows with missing composite key components */
+		not(missing(COUNTY))
+        and
+		not(missing(DISTRICT))
+        and
+		not(missing(SCHOOL))
+        and
+        not(missing(LANGUAGE))
+    ;
+    by
+		COUNTY
+		DISTRICT
+        SCHOOL
+		LANGUAGE
+    ;
+run;
+
+
+/*
+This code checks the fepsch19_raw dataset for missing key values and removes
+them. Then it sorts by COUNTY, DISTRICT, SCHOOL, and then LANGUAGE. The 
+four features were all necessary to create a compostire key for this set. 
+*/
+
+options OBS=max;
+proc sort
+        nodupkey
+        data=fepsch19_raw
+        dupout=fepsch19_raw_dups
+        out=fepsch19_no_dups
+    ;
+    where
+        /* remove rows with missing composite key components */
+		not(missing(COUNTY))
+        and
+		not(missing(DISTRICT))
+        and
+		not(missing(SCHOOL))
+        and
+        not(missing(LANGUAGE))
+    ;
+    by
+		COUNTY
+		DISTRICT
+        SCHOOL
+		LANGUAGE
+    ;
+run;
+
+
+
+
+/*
+This code checks the fepsch19_raw dataset for missing key values and removes
+them. Then it sorts by COUNTY, DISTRICT, SCHOOL, and then LANGUAGE. The 
+four features were all necessary to create a compostire key for this set. 
+*/
+
+options firstobs=1;
+options OBS=max;
+proc sort
+        nodupkey
+        data=ELASatrisk_raw
+        dupout=ELASatrisk_raw_dups
+        out=ELASatrisk_no_dups
+    ;
+    where
+        /* remove rows with missing composite key components */
+		not(missing(COUNTYCODE))
+        and
+		not(missing(DISTRICTCODE))
+        and
+		not(missing(SCHOOLCODE))
+        and
+		not(missing(GRADE))
+        and
+        not(missing(GENDER))
+    ;
+    by
+		COUNTYCODE
+		DISTRICTCODE
+        SCHOOLCODE
+		GRADE
+		GENDER
+    ;
+run;
+
+
+
+
+
+options OBS=100;
+proc print data=ELASatrisk_raw_dups; run;  
+
+options OBS=200000;
+options firstobs=199900;  
+proc print data=ELASatrisk_raw; 
+run; 
+
+
+
+
+
+
+
