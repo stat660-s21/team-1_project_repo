@@ -39,7 +39,7 @@ to the column "LC" in the "elsch19" and "fepsch19" files.
 Question 2 of 3: How does the primary language spoken affect chronic 
 absenteeism among California primary and secondary schools?
 
-Rationale: This information will furhter help to identify districts in greater 
+Rationale: This information will further help to identify districts in greater 
 need of funding from the state.  
 
 Note: This compares the column "LC" in the "elsch19" file to the 
@@ -50,8 +50,8 @@ column "Chronic Absenteeism Rate" in the "chronicabsenteeism19" datafile.
 * Research Question 3 Analysis Starting Point;
 *******************************************************************************;
 /*
-Question 3 of 3: How does the relative proportions of FEP students to EL 
-students affect the rates of chronic absenteesim in California schools? 
+Question 3 of 3: How does the relative proportion of FEP students to EL 
+students affect the rate of chronic absenteesim in California schools? 
 
 Rationale: This question would attempt to assess the relative rates of 
 abenteeism between English Learners, and those who have successfully learned 
