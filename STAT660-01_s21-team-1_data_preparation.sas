@@ -170,7 +170,7 @@ proc sort
         nodupkey
         data=elsch19_raw
         dupout=elsch19_raw_dups
-        out=elsch19_raw_no_dups
+        out=elsch19_raw_analytic
     ;
     where
         /* remove rows with missing composite key components */
@@ -208,7 +208,7 @@ proc sort
         nodupkey
         data=fepsch19_raw
         dupout=fepsch19_raw_dups
-        out=fepsch19_no_dups
+        out=fepsch19_analytic
     ;
     where
         /* remove rows with missing composite key components */
@@ -243,7 +243,7 @@ set.
          nodupkey
          data=ELASatrisk_raw
          dupout=ELASatrisk_raw_dups
-         out=ELASatrisk_no_dups
+         out=ELASatrisk_analytic
      ;
      where
          /* remove rows with missing composite key components */
@@ -283,7 +283,7 @@ for this set.
          nodupkey
          data=chronicabsenteeism_raw
          dupout=chronicabsenteeism_raw_dups
-         out=chronicabsenteeism_no_dups
+         out=chronicabsenteeism_analytic
      ;
      where
          /* remove rows with missing composite key components */
