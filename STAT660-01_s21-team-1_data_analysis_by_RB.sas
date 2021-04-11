@@ -31,6 +31,8 @@ will have positive influence on the students’ English proficiency.
 Note: This compares the column “Language”, “School” from elsch19 to the column of
 the same name from fepsch19.
 
+Limitations: Values of "Language" and "School" equal to zero or empty should be 
+excluded from this analysis, since they are potentially missing data values.
 */
 
 
@@ -47,6 +49,11 @@ Chronic Absenteeism Rate.
 Note: This compares the column "Language" from elsch19 to the column “Chronic 
 Absenteeism Rate” from chronicabsenteeism19.
 
+Limitations: Values of "Language" and "Chronic Absenteeism Rate" equal to zero 
+or empty should be excluded from this analysis, since they are potentially 
+missing data values. And only values of "AggregateLevel" eaqul to "S" should be 
+included in this analysis, since these rows contain SchoolName information.
+
 */
 
 
@@ -62,5 +69,11 @@ their Chronic Absenteeism Rate.
 
 Note: This compares the column “EO”, “IFEP”, “EL”, “RFEP”, “TBD” from ELAS/LTEL/
 AT-Risk Data to the column “Chronic Absenteeism Rate” from chronicabsenteeism19.
+
+Limitations: Values of “EO”, “IFEP”, “EL”, “RFEP”, “TBD” and "Chronic Absenteeism 
+Rate" equal to zero or empty should be excluded from this analysis, since they are
+potentially missing data values. And only values of "AggLEvel" and "AggregateLevel" 
+eaqul to "S" should be included in this analysis, since these rows contain 
+SchoolName information.
 
 */
