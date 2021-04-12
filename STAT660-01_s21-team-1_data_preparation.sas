@@ -18,8 +18,8 @@
 
 [Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/fselsch.asp
 
-[Unique ID Schema] The column CDS is a unique id.
-
+[Unique ID Schema] The columns COUNTY, DISTRICT, SCHOOL, and LANGUAGE form a 
+composite key. 
 */
 
 %let inputDataset1DSN = elsch19_raw;
@@ -45,7 +45,8 @@ AY2018-19
 
 [Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesfepsch.asp
 
-[Unique ID Schema] The column CDS is a unique id.
+[Unique ID Schema] The columns COUNTY, DISTRICT, SCHOOL, and LANGUAGE form a 
+composite key. 
 
 */
 
@@ -72,10 +73,10 @@ http://dq.cde.ca.gov/dataquest/longtermel/lteldnld.aspx?year=2018-19
 
 [Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesltel.asp
 
-[Unique ID Schema] The columns "County Code", "District Code", and "School Code" 
-form a composite key, which together are equivalent to the unique id column CDS 
-in dataset fepsch19 and dataset elsch19.
-
+[Unique ID Schema] The columns COUNTYCODE, DISTRICTCODE, SCHOOLCODE, GRADE and 
+GENDER form a composite key, which together are equivalent to the unique id 
+column CDS in dataset fepsch19 and dataset elsch19 but also incorporate 
+demographic information.
 */
 
 %let inputDataset3DSN = ELASatrisk_raw;
@@ -100,10 +101,10 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/ELASatrisk.csv
 
 [Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesabd.asp
 
-[Unique ID Schema] The columns "County Code", "District Code", and "School Code" 
-form a composite key, which together are equivalent to the unique id column CDS 
-in dataset elsch19 and dataset fepsch19.
-
+[Unique ID Schema] The columns COUNTYCODE, DISTRICTCODE, SCHOOLCODE, and 
+REPORTINGCATEGORY form a composite key, which together are equivalent to the 
+unique id column CDS in dataset fepsch19 and dataset elsch19 but also 
+incorporate demographic information.
 */
 
 %let inputDataset4DSN = chronicabsenteeism_raw;
@@ -160,7 +161,7 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
 
 /*
 This code checks the elsch19_raw dataset for missing key values and removes 
-them. The composite key is COUNTY, DISTRICT, SCHOOL, and then LANGUAGE. The four
+them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four
 features were all necessary to create a composite key for this set. 
 */
 
@@ -230,7 +231,7 @@ run;
 
 
 /*
-This code checks the fepsch19_raw dataset for missing key values and removes
+This code checks the ELASatrisk_raw dataset for missing key values and removes
 them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, GRADE and 
 GENDER. These features were all necessary to create a composite key for this 
 set. 
@@ -253,9 +254,9 @@ set.
          and
 		not(missing(SCHOOLCODE))
          and
- 		not(missing(Grade))
+ 		not(missing(GRADE))
          and
- 		not(missing(Gender))
+ 		not(missing(GENDER))
 		 and
          /* select rows with results only shown in School aggregate level */
     	AggLevel = "S"       
@@ -293,7 +294,7 @@ for this set.
          and
 		 not(missing(SCHOOLCODE))
          and
- 		 not(missing(ReportingCategory))
+ 		 not(missing(REPORTINGCATEGORY))
          and
          /* select rows with results only shown in School aggregate level */
     	 AggregateLevel = "S"
@@ -302,16 +303,6 @@ for this set.
  		COUNTYCODE
 		DISTRICTCODE
 		SCHOOLCODE
-    	ReportingCategory
+		REPORTINGCATEGORY
      ;
  run;
-
-
-
-
-
-
-
-
-
-
