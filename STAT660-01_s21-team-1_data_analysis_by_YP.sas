@@ -29,6 +29,11 @@ greater need of resources earmarked for learning English as a seond language.
 
 Note: This compares the column "Repoting category" from chronicabsenteeism19 
 to the column "LC" in the "elsch19" and "fepsch19" files.
+
+Limitations: In the files "elsch19" and "fepsch19", missing values and zeros 
+should be omitted from the LC columns since they are potentially missing values. 
+The same is true for missing information in the REPORTINGCATEGORY column of the 
+"chronicabsenteeism19" dataset.   
 */
 
 *******************************************************************************;
@@ -44,6 +49,12 @@ need of funding from the state.
 
 Note: This compares the column "LC" in the "elsch19" file to the 
 column "Chronic Absenteeism Rate" in the "chronicabsenteeism19" datafile. 
+
+
+Limitations: In the files "elsch19" and "fepsch19", missing values and zeros 
+should be omitted from the LC column since they are potentially missing values. 
+The same is true for missing information in the CHRONICABSENTEEISMRATE column of the 
+"chronicabsenteeism19" dataset.  
 */
 
 *******************************************************************************;
@@ -60,4 +71,9 @@ effective in lowering absenteeism.
 
 Note: This compares the column "LC" in the "elsch19" and "fepsch19" files to the 
 column "Chronic Absenteeism Rate" in the "chronicabsenteeism19" datafile.
+
+Limitations: In the files "elsch19" and "fepsch19", missing values and zeros 
+should be omitted from the LC column since they are potentially missing values. 
+The same is true for missing information in the CHRONICABSENTEEISMRATE column of the 
+"chronicabsenteeism19" dataset.  
 */
