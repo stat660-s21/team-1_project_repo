@@ -170,19 +170,19 @@ proc sort
     ;
     where
         /* remove rows with missing composite key components */
-		not(missing(COUNTY))
-		and
-		not(missing(DISTRICT))
-		and
-		not(missing(SCHOOL))
-		and
+	not(missing(COUNTY))
+	and
+	not(missing(DISTRICT))
+	and
+	not(missing(SCHOOL))
+	and
         not(missing(LANGUAGE))
     ;
     by
-		COUNTY
-		DISTRICT
-		SCHOOL
-		LANGUAGE
+	COUNTY
+	DISTRICT
+	SCHOOL
+	LANGUAGE
     ;
 run;
 
@@ -202,19 +202,19 @@ proc sort
     ;
     where
         /* remove rows with missing composite key components */
-		not(missing(COUNTY))
- 		and
-		not(missing(DISTRICT))
- 		and
-		not(missing(SCHOOL))
-  		and
+	not(missing(COUNTY))
+ 	and
+	not(missing(DISTRICT))
+ 	and
+	not(missing(SCHOOL))
+  	and
         not(missing(LANGUAGE))
     ;
     by
-		COUNTY
-		DISTRICT
-		SCHOOL
-		LANGUAGE
+	COUNTY
+	DISTRICT
+	SCHOOL
+	LANGUAGE
     ;
 run;
 
@@ -235,25 +235,25 @@ set.
      ;
      where
          /* remove rows with missing composite key components */
-		not(missing(COUNTYCODE))
-		and
- 		not(missing(DISTRICTCODE))
- 		and
-		not(missing(SCHOOLCODE))
- 		and
- 		not(missing(GRADE))
- 		and
- 		not(missing(GENDER))
- 		and
+         not(missing(COUNTYCODE))
+	 and
+ 	 not(missing(DISTRICTCODE))
+ 	 and
+	 not(missing(SCHOOLCODE))
+ 	 and
+ 	 not(missing(GRADE))
+ 	 and
+ 	 not(missing(GENDER))
+ 	 and
          /* select rows with results only shown in School aggregate level */
-    	AggLevel = "S"       
+    	 AggLevel = "S"       
      ;
      by
- 		COUNTYCODE
-		DISTRICTCODE
-		SCHOOLCODE
-		GRADE
-		GENDER
+ 	 COUNTYCODE
+	 DISTRICTCODE
+	 SCHOOLCODE
+	 GRADE
+	 GENDER
      ;
  run;
 
@@ -274,21 +274,21 @@ for this set.
      ;
      where
          /* remove rows with missing composite key components */
-		not(missing(COUNTYCODE))
-  		and
- 		not(missing(DISTRICTCODE))
- 		and
-		not(missing(SCHOOLCODE))
- 		and
-		not(missing(REPORTINGCATEGORY))
- 		and
+	 not(missing(COUNTYCODE))
+  	 and
+ 	 not(missing(DISTRICTCODE))
+ 	 and
+	 not(missing(SCHOOLCODE))
+ 	 and
+	 not(missing(REPORTINGCATEGORY))
+ 	 and
          /* select rows with results only shown in School aggregate level */
-		AggregateLevel = "S"
+	 AggregateLevel = "S"
      ;
      by
- 		COUNTYCODE
-		DISTRICTCODE
-		SCHOOLCODE
-		REPORTINGCATEGORY
+ 	 COUNTYCODE
+	 DISTRICTCODE
+	 SCHOOLCODE
+	 REPORTINGCATEGORY
      ;
  run;
