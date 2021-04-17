@@ -28,7 +28,6 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/elsch19.csv
 ;
 %let inputDataset1Type = CSV;
 
-
 /*
 [Dataset 2 Name] fepsch19
 
@@ -55,7 +54,6 @@ composite key.
 https://github.com/stat660/team-1_project_repo/raw/main/data/fepsch19.csv
 ;
 %let inputDataset2Type = CSV;
-
 
 /*
 [Dataset 3 Name] ELAS/LTEL/AT-Risk Data
@@ -85,7 +83,6 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/ELASatrisk.csv
 ;
 %let inputDataset3Type = CSV;
 
-
 /*
 [Dataset 4 Name] chronicabsenteeism19
 
@@ -112,7 +109,6 @@ incorporate demographic information.
 https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.csv
 ;
 %let inputDataset4Type = CSV;
-
 
 /* load raw datasets over the wire, if they don't already exist */
 %macro loadDataIfNotAlreadyAvailable(dsn,url,filetype);
@@ -158,13 +154,9 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
 %mend;
 %loadDatasets
 
-
-/*
-This code checks the elsch19_raw dataset for missing key values and removes 
+/* This code checks the elsch19_raw dataset for missing key values and removes 
 them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four
-features were all necessary to create a composite key for this set. 
-*/
-
+features were all necessary to create a composite key for this set. */
 options firstobs=1;
 options OBS=max;
 proc sort
@@ -176,11 +168,11 @@ proc sort
     where
         /* remove rows with missing composite key components */
 		not(missing(COUNTY))
-        and
+		and
 		not(missing(DISTRICT))
-        and
+		and
 		not(missing(SCHOOL))
-        and
+		and
         not(missing(LANGUAGE))
     ;
     by
@@ -191,18 +183,9 @@ proc sort
     ;
 run;
 
-
-options OBS=200;
-options firstobs=190;
-proc print data=elsch19_raw; run;  
-
-
-/*
-This code checks the fepsch19_raw dataset for missing key values and removes 
+/* This code checks the fepsch19_raw dataset for missing key values and removes 
 them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four 
-features were all necessary to create a composite key for this set. 
-*/
-
+features were all necessary to create a composite key for this set. */
 options firstobs=1;
 options OBS=max;
 proc sort
@@ -214,11 +197,11 @@ proc sort
     where
         /* remove rows with missing composite key components */
 		not(missing(COUNTY))
-        and
+ 		and
 		not(missing(DISTRICT))
-        and
+ 		and
 		not(missing(SCHOOL))
-        and
+  		and
         not(missing(LANGUAGE))
     ;
     by
@@ -229,80 +212,71 @@ proc sort
     ;
 run;
 
-
-/*
-This code checks the ELASatrisk_raw dataset for missing key values and removes
+/* This code checks the ELASatrisk_raw dataset for missing key values and removes
 them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, GRADE and 
 GENDER. These features were all necessary to create a composite key for this 
-set. 
-*/
-
-
- options firstobs=1;
- options OBS=max;
- proc sort
-         nodupkey
-         data=ELASatrisk_raw
-         dupout=ELASatrisk_raw_dups
-         out=ELASatrisk_analytic
-     ;
-     where
-         /* remove rows with missing composite key components */
+set. */
+options firstobs=1;
+options OBS=max;
+proc sort
+        nodupkey
+        data=ELASatrisk_raw
+        dupout=ELASatrisk_raw_dups
+        out=ELASatrisk_analytic
+    ;
+    where
+        /* remove rows with missing composite key components */
 		not(missing(COUNTYCODE))
-         and
- 		not(missing(DISTRICTCODE))
-         and
+		and
+		not(missing(DISTRICTCODE))
+		and
 		not(missing(SCHOOLCODE))
-         and
- 		not(missing(GRADE))
-         and
- 		not(missing(GENDER))
-		 and
-         /* select rows with results only shown in School aggregate level */
-    	AggLevel = "S"       
-     ;
-     by
- 		COUNTYCODE
+		and
+		not(missing(GRADE))
+		and
+		not(missing(GENDER))
+		and
+		/* select rows with results only shown in School aggregate level */
+		AggLevel = "S"       
+	;
+    by
+		COUNTYCODE
 		DISTRICTCODE
 		SCHOOLCODE
 		GRADE
 		GENDER
-     ;
- run;
+	;
+run;
 
-
-/*
-This code checks the chronicabsenteeism_raw dataset for missing key values and 
+/* This code checks the chronicabsenteeism_raw dataset for missing key values and 
 removes them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, and 
 REPORTINGCATEGORY. These features were all necessary to create a composite key 
-for this set. 
-*/
-
- options firstobs=1;
- options OBS=max;
- proc sort
-         nodupkey
-         data=chronicabsenteeism_raw
-         dupout=chronicabsenteeism_raw_dups
-         out=chronicabsenteeism_analytic
-     ;
-     where
-         /* remove rows with missing composite key components */
- 		 not(missing(COUNTYCODE))
-         and
- 		 not(missing(DISTRICTCODE))
-         and
-		 not(missing(SCHOOLCODE))
-         and
- 		 not(missing(REPORTINGCATEGORY))
-         and
-         /* select rows with results only shown in School aggregate level */
-    	 AggregateLevel = "S"
-     ;
-     by
- 		COUNTYCODE
+for this set. */
+options firstobs=1;
+options OBS=max;
+proc sort
+		nodupkey
+		data=chronicabsenteeism_raw
+		dupout=chronicabsenteeism_raw_dups
+		out=chronicabsenteeism_analytic
+	;
+	where
+	/* remove rows with missing composite key components */
+		not(missing(COUNTYCODE))
+		and
+		not(missing(DISTRICTCODE))
+		and
+		not(missing(SCHOOLCODE))
+		and
+		not(missing(REPORTINGCATEGORY))
+		and
+		/* select rows with results only shown in School aggregate level */
+		AggregateLevel = "S"
+	;
+	by
+		COUNTYCODE
 		DISTRICTCODE
 		SCHOOLCODE
 		REPORTINGCATEGORY
-     ;
- run;
+	;
+run;
