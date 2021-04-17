@@ -46,7 +46,6 @@ AY2018-19
 
 [Unique ID Schema] The columns COUNTY, DISTRICT, SCHOOL, and LANGUAGE form a 
 composite key. 
-
 */
 
 %let inputDataset2DSN = fepsch19_raw;
@@ -225,7 +224,8 @@ proc sort
         out=ELASatrisk_analytic
     ;
     where
-        /* remove rows with missing composite key components */
+    /* remove rows with missing composite key components */
+
 		not(missing(COUNTYCODE))
 		and
 		not(missing(DISTRICTCODE))
