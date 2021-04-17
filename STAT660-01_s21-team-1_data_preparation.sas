@@ -173,7 +173,7 @@ proc sort
 		and
 		not(missing(SCHOOL))
 		and
-        not(missing(LANGUAGE))
+		not(missing(LANGUAGE))
     ;
     by
 		COUNTY
@@ -202,7 +202,7 @@ proc sort
  		and
 		not(missing(SCHOOL))
   		and
-        not(missing(LANGUAGE))
+		not(missing(LANGUAGE))
     ;
     by
 		COUNTY
