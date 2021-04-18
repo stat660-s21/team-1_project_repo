@@ -123,6 +123,6 @@ proc sql;
        on S.SCHOOL=C.SCHOOL;
 quit;
 title "Students Type and Their Chronic Absenteeism Rate in Each School";
-proc print data=ELASatrisk_chroabsent_raw(obs=5); 
+proc print data=ELASatrisk_chroabsent_raw(obs=10); 
 run;
 title;
