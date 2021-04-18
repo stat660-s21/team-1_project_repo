@@ -280,3 +280,6 @@ proc print data=temp;
 	sum ChronicAbsenteeismCount; 
 	by CountyName; 
 run;
+
+title;
+footnote;
