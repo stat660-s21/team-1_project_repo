@@ -24,9 +24,9 @@ composite key.
 
 %let inputDataset1DSN = elsch19_raw;
 %let inputDataset1URL = 
-https://github.com/stat660/team-1_project_repo/raw/main/data/elsch19.csv
+https://github.com/stat660/team-1_project_repo/raw/main/data/elsch19.xlsx
 ;
-%let inputDataset1Type = CSV;
+%let inputDataset1Type = xlsx;
 
 /*
 [Dataset 2 Name] fepsch19
@@ -42,7 +42,7 @@ AY2018-19
 
 [Data Source] http://dq.cde.ca.gov/dataquest/dlfile/dlfile.aspx?cLevel=School&cYear=2018-19&cCat=FEP&cPage=filesfepsch
 
-[Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesfepsch.asp
+[Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/fsfepsch.asp
 
 [Unique ID Schema] The columns COUNTY, DISTRICT, SCHOOL, and LANGUAGE form a 
 composite key. 
@@ -50,9 +50,9 @@ composite key.
 
 %let inputDataset2DSN = fepsch19_raw;
 %let inputDataset2URL = 
-https://github.com/stat660/team-1_project_repo/raw/main/data/fepsch19.csv
+https://github.com/stat660/team-1_project_repo/raw/main/data/fepsch19.xlsx
 ;
-%let inputDataset2Type = CSV;
+%let inputDataset2Type = xlsx;
 
 /*
 [Dataset 3 Name] ELAS/LTEL/AT-Risk Data
@@ -78,9 +78,9 @@ demographic information.
 
 %let inputDataset3DSN = ELASatrisk_raw;
 %let inputDataset3URL = 
-https://github.com/stat660/team-1_project_repo/raw/main/data/ELASatrisk.csv
+https://github.com/stat660/team-1_project_repo/raw/main/data/ELASatrisk.xlsx
 ;
-%let inputDataset3Type = CSV;
+%let inputDataset3Type = xlsx;
 
 /*
 [Dataset 4 Name] chronicabsenteeism19
@@ -95,7 +95,7 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/ELASatrisk.csv
 
 [Data Source] https://www3.cde.ca.gov/demo-downloads/attendance/chrabs1819.txt
 
-[Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/filesabd.asp
+[Data Dictionary] https://www.cde.ca.gov/ds/sd/sd/fsabd.asp
 
 [Unique ID Schema] The columns COUNTYCODE, DISTRICTCODE, SCHOOLCODE, and 
 REPORTINGCATEGORY form a composite key, which together are equivalent to the 
@@ -105,9 +105,9 @@ incorporate demographic information.
 
 %let inputDataset4DSN = chronicabsenteeism_raw;
 %let inputDataset4URL = 
-https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.csv
+https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.xlsx
 ;
-%let inputDataset4Type = CSV;
+%let inputDataset4Type = xlsx;
 
 /* load raw datasets over the wire, if they don't already exist */
 %macro loadDataIfNotAlreadyAvailable(dsn,url,filetype);
@@ -153,38 +153,36 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
 %mend;
 %loadDatasets
 
-/* This code checks the elsch19_raw dataset for missing key values and removes 
+/* 
+This code checks the elsch19_raw dataset for missing key values and removes 
 them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four
-features were all necessary to create a composite key for this set. */
+features were all necessary to create a composite key for this set. 
+*/
 options firstobs=1;
 options OBS=max;
 proc sort
         nodupkey
         data=elsch19_raw
         dupout=elsch19_raw_dups
-        out=elsch19_raw_analytic
+        out=elsch19_analytic
     ;
     where
         /* remove rows with missing composite key components */
-		not(missing(COUNTY))
-		and
-		not(missing(DISTRICT))
-		and
-		not(missing(SCHOOL))
-		and
-		not(missing(LANGUAGE))
+        not(missing(cdscode))
+        and
+        not(missing(LANGUAGE))
     ;
     by
-		COUNTY
-		DISTRICT
-		SCHOOL
-		LANGUAGE
+        cdscode
+        LANGUAGE
     ;
 run;
 
-/* This code checks the fepsch19_raw dataset for missing key values and removes 
+/* 
+This code checks the fepsch19_raw dataset for missing key values and removes 
 them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four 
-features were all necessary to create a composite key for this set. */
+features were all necessary to create a composite key for this set. 
+*/
 options firstobs=1;
 options OBS=max;
 proc sort
@@ -195,26 +193,22 @@ proc sort
     ;
     where
         /* remove rows with missing composite key components */
-		not(missing(COUNTY))
- 		and
-		not(missing(DISTRICT))
- 		and
-		not(missing(SCHOOL))
-  		and
-		not(missing(LANGUAGE))
+        not(missing(cdscode))
+        and
+        not(missing(LANGUAGE))
     ;
     by
-		COUNTY
-		DISTRICT
-		SCHOOL
-		LANGUAGE
+        cdscode
+        LANGUAGE
     ;
 run;
 
-/* This code checks the ELASatrisk_raw dataset for missing key values and removes
+/* 
+This code checks the ELASatrisk_raw dataset for missing key values and removes
 them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, GRADE and 
 GENDER. These features were all necessary to create a composite key for this 
-set. */
+set. 
+*/
 options firstobs=1;
 options OBS=max;
 proc sort
@@ -226,57 +220,71 @@ proc sort
     where
     /* remove rows with missing composite key components */
 
-		not(missing(COUNTYCODE))
-		and
-		not(missing(DISTRICTCODE))
-		and
-		not(missing(SCHOOLCODE))
-		and
-		not(missing(GRADE))
-		and
-		not(missing(GENDER))
-		and
-		/* select rows with results only shown in School aggregate level */
-		AggLevel = "S"       
-	;
+        not(missing(cdscode))
+        and
+        not(missing(GRADE))
+        and
+        not(missing(GENDER))
+        and
+        /* select rows with results only shown in School aggregate level */
+        AggLevel = "S"       
+    ;
     by
-		COUNTYCODE
-		DISTRICTCODE
-		SCHOOLCODE
-		GRADE
-		GENDER
-	;
+        cdscode
+        GRADE
+        GENDER
+    ;
 run;
 
-/* This code checks the chronicabsenteeism_raw dataset for missing key values and 
+/* 
+This code checks the chronicabsenteeism_raw dataset for missing key values and 
 removes them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, and 
 REPORTINGCATEGORY. These features were all necessary to create a composite key 
-for this set. */
+for this set. 
+*/
 options firstobs=1;
 options OBS=max;
 proc sort
-		nodupkey
-		data=chronicabsenteeism_raw
-		dupout=chronicabsenteeism_raw_dups
-		out=chronicabsenteeism_analytic
-	;
-	where
-	/* remove rows with missing composite key components */
-		not(missing(COUNTYCODE))
-		and
-		not(missing(DISTRICTCODE))
-		and
-		not(missing(SCHOOLCODE))
-		and
-		not(missing(REPORTINGCATEGORY))
-		and
-		/* select rows with results only shown in School aggregate level */
-		AggregateLevel = "S"
-	;
-	by
-		COUNTYCODE
-		DISTRICTCODE
-		SCHOOLCODE
-		REPORTINGCATEGORY
-	;
+        nodupkey
+        data=chronicabsenteeism_raw
+        dupout=chronicabsenteeism_raw_dups
+        out=chronicabsenteeism_analytic
+    ;
+    where
+    /* remove rows with missing composite key components */
+        not(missing(cdscode))
+        and
+        /* select rows with results only shown in School aggregate level */
+        AggregateLevel = "S"
+    ;
+    by
+       cdscode
+       REPORTINGCATEGORY
+    ;
 run;
+
+
+/*
+The following code combines all of the above datasets into sets usable for 
+all of our analyses. 
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
