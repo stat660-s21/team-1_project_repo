@@ -271,20 +271,63 @@ all of our analyses.
 
 */
 
+/*
+This first set of code chunks combines the files elsch19_analytic and 
+fepsch19_analytic into one file called fepel_analytic
+*/
+
+/*
+sort both sets by cdscode and lc
+*/
+proc sort data=elsch19_analytic out=elsch19_temp;
+    by cdscode lc; 
+run;
+proc sort data=fepsch19_analytic out=fepsch19_temp;
+    by cdscode lc; 
+run;
 
 
+/*
+Drop irrelevant columns.
+*/
+data elsch19_temp; 
+    set elsch19_temp; 
+    keep
+        cdscode 
+        county
+        lc 
+        language
+        total_el
+    ;
+run; 
 
+data fepsch19_temp; 
+    set fepsch19_temp; 
+    keep
+        cdscode 
+        county
+        lc 
+        language
+        total
+    ;
+run; 
 
+/*
+Merge into one dataset
+*/
+data fepel_analytic; 
+    merge 
+        fepsch19_temp 
+        elsch19_temp; 
+    by 
+        cdscode 
+        lc; 
+run;  
 
-
-
-
-
-
-
-
-
-
-
-
-
+/*
+Creating a usable chronicabsentessism file:
+*/
+data Chronic_abs_analytic;
+    set chronicabsenteeism_analytic; 
+    if REPORTINGCATEGORY in ("SE", "SH", "TA");
+run; 
