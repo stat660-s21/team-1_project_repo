@@ -36,12 +36,33 @@ excluded from this analysis, since they are potentially missing data values.
 */
 
 proc sql;
-   create table elsch19_fepsch19_raw AS
-       select coalesce(E.SCHOOL, F.SCHOOL), E.LANGUAGE AS LANGUAGE_EL, E.TOTAL_EL, 
+    create table abc as
+	    select cds, school
+		from elsch19_raw_analytic
+		group by cds
+        order by cds;
+quit;
+proc print data=elsch19_raw_analytic(obs=50); 
+    format cds 14.;
+run;
+proc sql;
+    create table elsch19_anakytic as
+	    select cds, county, district, school, language, max(total_el) as total
+		from elsch19_raw_analytic
+		group by cds
+		having total_el=total
+        order by cds;
+quit;
+proc print data=elsch19_analytic(obs=20); 
+    format cds 14.;
+run;
+proc sql;
+    create table elsch19_fepsch19_raw AS
+        select coalesce(E.SCHOOL, F.SCHOOL), E.LANGUAGE AS LANGUAGE_EL, E.TOTAL_EL, 
               F.LANGUAGE AS LANGUAGE_FEP, F.TOTAL AS TOTAL_FEP
-       from elsch19_raw_analytic AS E full join fepsch19_analytic AS F
-       on E.SCHOOL=F.SCHOOL
-       group by SCHOOL;
+        from elsch19_raw_analytic AS E full join fepsch19_analytic AS F
+        on E.SCHOOL=F.SCHOOL
+        group by SCHOOL;
 quit;
 title "All Languages spkoen by EL and FEP in Different Schools";
 proc print data=elsch19_fepsch19_raw(obs=5); 

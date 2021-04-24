@@ -153,9 +153,22 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
 %mend;
 %loadDatasets
 
-/* This code checks the elsch19_raw dataset for missing key values and removes 
-them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four
-features were all necessary to create a composite key for this set. */
+/* 
+This code checks the elsch19_raw dataset for missing key values and removes 
+them. For elsch19_raw, the column SCHOOL is a primary key, so any rows 
+corresponding to multiple values should be removed. In addition, rows should
+be removed if they are missing values for SCHOOL.
+
+But we cannot remove directly duplicates of SCHOOL from the original table, 
+because each school name corresponds to multiple languages and we want to 
+keep the language with the highest total.
+
+After running the proc sort and proc sql steps below, the new dataset 
+elsch19_analytic will have no duplicate/repeated unique id values, and all 
+unique id values will corresond to our experimental units of interests, 
+which are California Schools. This means the column SCHOOL in 
+elsch19_analytic is guranteed to be a primary key.
+*/
 options firstobs=1;
 options OBS=max;
 proc sort
@@ -181,17 +194,42 @@ proc sort
 		LANGUAGE
     ;
 run;
+proc sql;
+    create table elsch19_analytic as
+	    select county, school, language, max(total_el) as totalnum
+		from elsch19_raw_analytic
+		group by school
+		having total_el=totalnum
+        order by school;
+quit;
+title "First Twenty Rows of 'elsch19_analytic' Table";
+proc print data=elsch19_analytic(obs=20);
+run;
+title;
 
-/* This code checks the fepsch19_raw dataset for missing key values and removes 
-them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four 
-features were all necessary to create a composite key for this set. */
+/* 
+This code checks the fepsch19_raw dataset for missing key values and removes 
+them. For fepsch19_raw, the column SCHOOL is a primary key, so any rows 
+corresponding to multiple values should be removed. In addition, rows should
+be removed if they are missing values for SCHOOL.
+
+But we cannot remove directly duplicates of SCHOOL from the original table, 
+because each school name corresponds to multiple languages and we want to 
+keep the language with the highest total.
+
+After running the proc sort and proc sql steps below, the new dataset 
+fepsch19_analytic will have no duplicate/repeated unique id values, and all 
+unique id values will corresond to our experimental units of interests, 
+which are California Schools. This means the column SCHOOL in 
+fepsch19_analytic is guranteed to be a primary key.
+*/
 options firstobs=1;
 options OBS=max;
 proc sort
         nodupkey
         data=fepsch19_raw
         dupout=fepsch19_raw_dups
-        out=fepsch19_analytic
+        out=fepsch19_raw_analytic
     ;
     where
         /* remove rows with missing composite key components */
@@ -210,18 +248,42 @@ proc sort
 		LANGUAGE
     ;
 run;
+proc sql;
+    create table fepsch19_analytic as
+	    select county, school, language, max(total) as totalnum
+		from fepsch19_raw_analytic
+		group by school
+		having total=totalnum
+        order by school;
+quit;
+title "First Twenty Rows of 'fepsch19_analytic' Table";
+proc print data=fepsch19_analytic(obs=20);
+run;
+title;
 
-/* This code checks the ELASatrisk_raw dataset for missing key values and removes
-them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, GRADE and 
-GENDER. These features were all necessary to create a composite key for this 
-set. */
+/* 
+This code checks the ELASatrisk_raw dataset for missing key values and 
+removes them. For ELASatrisk_raw, the column SCHOOLNAME is a primary key,
+so any rows corresponding to multiple values should be removed. In addition,
+rows should be removed if they are missing values for SCHOOLNAME.
+
+But we cannot remove directly duplicates of SCHOOLNAME from the original 
+table, because each school name corresponds to multiple rows and we want to
+keep the average values of these duplicate rows.
+
+After running the proc sort and proc sql steps below, the new dataset 
+ELASatrisk_analytic will have no duplicate/repeated unique id values, and 
+all unique id values will corresond to our experimental units of interests,
+which are California Schools. This means the column SCHOOL in 
+ELASatrisk_analytic is guranteed to be a primary key.
+*/
 options firstobs=1;
 options OBS=max;
 proc sort
         nodupkey
         data=ELASatrisk_raw
         dupout=ELASatrisk_raw_dups
-        out=ELASatrisk_analytic
+        out=ELASatrisk_raw_analytic
     ;
     where
     /* remove rows with missing composite key components */
@@ -232,9 +294,11 @@ proc sort
 		and
 		not(missing(SCHOOLCODE))
 		and
-		not(missing(GRADE))
+		not(missing(COUNTYNAME))
 		and
-		not(missing(GENDER))
+		not(missing(DISTRICTNAME))
+		and
+		not(missing(SCHOOLNAME))
 		and
 		/* select rows with results only shown in School aggregate level */
 		AggLevel = "S"       
@@ -243,22 +307,48 @@ proc sort
 		COUNTYCODE
 		DISTRICTCODE
 		SCHOOLCODE
-		GRADE
-		GENDER
+		COUNTYNAME
+		DISTRICTNAME
+		SCHOOLNAME
 	;
 run;
+proc sql;
+    create table ELASatrisk_analytic as
+	    select countyname, schoolname, avg(EO) as EO, avg(IFEP) as IFEP, 
+               avg(EL) as EL, avg(RFEP) as RFEP, avg(TBD) as TBD
+		from ELASatrisk_raw_analytic
+		group by schoolname
+        order by schoolname;
+quit;
+title "First Twenty Rows of 'ELASatrisk_analytic' Table";
+proc print data=ELASatrisk_analytic(obs=20);
+run;
+title;
 
-/* This code checks the chronicabsenteeism_raw dataset for missing key values and 
-removes them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, and 
-REPORTINGCATEGORY. These features were all necessary to create a composite key 
-for this set. */
+/* 
+This code checks the chronicabsenteeism_raw dataset for missing key values
+and removes them. For chronicabsenteeism_raw, the column SCHOOLNAME is a
+primary key, so any rows corresponding to multiple values should be removed.
+In addition, rows should be removed if they are missing values for 
+SCHOOLNAME.
+
+But we cannot remove directly duplicates of SCHOOLNAME from the original 
+table, because each school name corresponds to multiple rows and we want to
+keep the average values of these duplicate rows.
+
+After running the proc sort and proc sql steps below, the new dataset 
+chronicabsenteeism_analytic will have no duplicate/repeated unique id values, 
+and all unique id values will corresond to our experimental units of 
+interests, which are California Schools. This means the column SCHOOL in 
+ELASatrisk_analytic is guranteed to be a primary key.
+*/
 options firstobs=1;
 options OBS=max;
 proc sort
 		nodupkey
 		data=chronicabsenteeism_raw
 		dupout=chronicabsenteeism_raw_dups
-		out=chronicabsenteeism_analytic
+		out=chronicabsenteeism_raw_analytic
 	;
 	where
 	/* remove rows with missing composite key components */
@@ -268,7 +358,12 @@ proc sort
 		and
 		not(missing(SCHOOLCODE))
 		and
-		not(missing(REPORTINGCATEGORY))
+		
+		not(missing(COUNTYNAME))
+		and
+		not(missing(DISTRICTNAME))
+		and
+		not(missing(SCHOOLNAME))
 		and
 		/* select rows with results only shown in School aggregate level */
 		AggregateLevel = "S"
@@ -277,6 +372,103 @@ proc sort
 		COUNTYCODE
 		DISTRICTCODE
 		SCHOOLCODE
-		REPORTINGCATEGORY
+		
+		COUNTYNAME
+		DISTRICTNAME
+		SCHOOLNAME
 	;
+run;
+data chrabs_raw_format_analytic;
+    set chronicabsenteeism_raw_analytic;
+        chrabsrate=input(chronicabsenteeismrate, 4.1);
+		drop chronicabsenteeismrate;
+run;
+proc sql;
+    create table chronicabsenteeism_analytic as
+	    select countyname, schoolname,  
+               avg(chrabsrate) as chrabsrate
+		from chrabs_raw_format_analytic
+		group by schoolname
+        order by schoolname;
+quit;
+title "First Twenty Rows of 'chronicabsenteeism_analytic' Table";
+proc print data=chronicabsenteeism_analytic(obs=20);
+run;
+title;
+
+/* Build analytic dataset from raw datasets imported above including only 
+the columns and minimal data-cleaning/transforamtion needed to address each
+research queations/objectives in data-analysis files.*/
+proc sql;
+    create table cde_analytic_raw as
+	    select 
+            coalesce(E.county, F.county, S.countyname, C.countyname)
+			as county,
+            coalesce(E.school, F.school, S.schoolname, C.schoolname)
+			as school,
+			E.language as language_EL 
+            label"Language Spoken by the Most EL",
+			E.totalnum as total_EL 
+            label"Total Number of EL Speaking that Selected Language",
+			F.language as language_FEP 
+            label"Language spoken by the most FEP",
+			F.totalnum as total_FEP
+            label"Total Number of FEP Speaking that Selected Language",
+            S.EO as EO_num
+            label"Total Number of EO",
+            S.IFEP as IFEP_num
+            label"Total Number of IFEP", 
+            S.EL as EL_num 
+			label"Total Number of EL",
+            S.RFEP as RFEP_num
+			label"Total Number of RFEP",
+            S.TBD as TBD_num
+			label"Total Number of TBD",
+			C.chrabsrate as chrabs_rate
+			label"ChronicAbsenteeismRate"
+		from elsch19_analytic as E
+		    full join
+            fepsch19_analytic as F
+			on E.school=F.school
+			full join
+            ELASatrisk_analytic as S
+			on E.school=S.schoolname
+			full join
+            chronicabsenteeism_analytic as C
+            on E.school=C.schoolname
+        order by school
+	;
+quit;
+title "First Twenty Rows of 'cde_analytic_raw' Table";
+proc print data=cde_analytic_raw(obs=20);
+run;
+title;
+
+/* 
+Check cde_analytic_raw for bad unique id values, where the column school
+is intended to be a primary key.
+
+After executing this data step, the resulting dataset is emptywe, meaning
+that full joins used above didn't introduce duplicates in the 
+cde_analytic_raw. So we can do further proceeding.
+*/
+data cde_analytic_raw_bad_ids;
+    set cde_analytic_raw;
+	by school;
+	if
+		missing(school)
+	then
+	    do;
+		    output;
+		end;
+run;
+proc sort
+        nodupkey
+        data=cde_analytic_raw
+        dupout=cde_analytic_raw_dups
+        out=cde_analytic
+    ;
+    by
+		school
+    ;
 run;
