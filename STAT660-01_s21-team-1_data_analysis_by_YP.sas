@@ -19,7 +19,6 @@ answer the research questions below
 *******************************************************************************;
 * Research Question 1 Analysis Startinqg Point;
 *******************************************************************************;
-
 /*
 Question 1 of 3: How do rates of homeless students and rates of ESL learners 
 interact in California at the School level? 
@@ -36,173 +35,83 @@ Changed Question again to address schools since it's now possible.
 
 Limitations: Edited (4/24): this question can actually be addressed using only 
 the chronic_abs_analytic file: 
-
-Need to summarize data: 
-
-Chronic_abs_analytic
-(cdscode & reportingcat=SE)
-/
-(cdscode & reportingcat=TA) 
-= 
-School ESL rate 
-
-(cdscode & reportingcat=SH)
-/
-(cdscode & reportingcat=TA) 
-= 
-School homeless rate 
 */
 
 /*
-From the Chronicabsenteeism_analytic data set, I need to look at the number of 
-homeless students in each County. To that end, I will create another dataset 
-called homeless_absentees which includes only the homeless students. 
+Here I create a single dataset with all of the information needed to address
+this question. The file it outputs contains only the cdscode, rate of chronic
+absenteeism among English learners, rate of absenteeism among homeless students,
+and rates of absenteeism among the entire school population.  
 */ 
 data homeless_absentees;
     set Chronic_abs_analytic;
     where ReportingCategory = "SH";
-run;
 data esl_absentees;
     set Chronic_abs_analytic;
     where ReportingCategory = "SE";
-run;
-
+data tot_absentees;
+    set Chronic_abs_analytic;
+    where ReportingCategory = "TA";
 data absentees_temp;
-    merge esl_absentees (rename=(ChronicAbsenteeismRate=eslabsenteerate))
-        homeless_absentees (rename=(ChronicAbsenteeismRate=homelessabsenteerate));
+    merge 
+        esl_absentees (rename=(ChronicAbsenteeismRate=ESLAbsenteeRate))
+        homeless_absentees (rename=(ChronicAbsenteeismRate=HomelessAbsenteeRate))
+        tot_absentees (rename=(ChronicAbsenteeismRate=TotalAbsenteeRate))
+    ;
     by cdscode;
 run; 
 
-data absentees_temp; 
+data absentees_analytic; 
     set absentees_temp; 
     ;
     where
-        not(missing(eslabsenteerate))
+        not(missing(ESLAbsenteeRate))
         and
-        not(missing(homelessabsenteerate))     
+        not(missing(HomelessAbsenteeRate))
+        and 
+        not(missing(TotalAbsenteeRate))
+        and
+        ESLAbsenteeRate^="*" 
+        and 
+        HomelessAbsenteeRate^="*"
+        and 
+        TotalAbsenteeRate^="*"
     ;
+    drop 
+        ReportingCategory
+        CumulativeEnrollment
+        ChronicAbsenteeismCount
+        CountyName
+    ;       
 run;
 
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 title1 justify=left
-'Question 1 of 3: How do rates of homeless students and rates of ESL learners interact in California at the County level?'
+'Question 1 of 3: How do rates of homeless students and rates of ESL learners interact in California schools?'
 ;
 
 title2 justify=left
 'Rationale: This should help us understand which regions in the state are in greater need of resources earmarked for various social programs.'
 ;
 
+title3 justify=left
+"This table shows rates of chronic absenteeism among homeless students, English learners, and for the total population in 4736 California schools."
+;
+
 footnote1 justify=left
-"I still need to understand how to merge these tables into one dataset with just the county totals."
+"This should be the only file I need to carry out this analysis."
 ;
 
-/* 
-This code creates a table for each county summarizing the number of homeless
-students 
-*/
-title3 justify=left
-'This first set of tables summarizes homelessness within Counties.'
-;
-
-proc sort data=homeless_absentees out=temp; 
-    by CountyName;
+options obs=10;
+proc print data=absentees_analytic;
 run;
-proc print data=temp;
-    var CumulativeEnrollment;
-    sum CumulativeEnrollment; 
-    by CountyName; 
-run;
-
-/* 
-This creates tables for each county summarizing the total number of students. 
-*/
-title3 justify=left
-'This set of tables summarizes total enrollment within Counties.'
-;
-
-proc sort data=Chronicabsenteeism_analytic out=temp; 
-    by CountyName;
-run;
-proc print data=temp;
-    var CumulativeEnrollment;
-    sum CumulativeEnrollment; 
-    by CountyName; 
-run;
-
-/* 
-The last set of tables here looks at the number of ESL students in each County
-*/
-title3 justify=left
-'This set of tables summarizes total number of ESL students within Counties.'
-;
-
-proc sort data=elsch19_raw_analytic out=temp; 
-    by COUNTY;
-run;
-proc print data=temp;
-    var TOTAL_EL;
-    sum TOTAL_EL; 
-    by COUNTY; 
-run;
+options obs=max;
 
 title;
 footnote;
 
-
-
-
-
-
-
-
-
-options obs=10;
-proc print data=Chronicabsenteeism_analytic; 
-run; 
-options obs=max;  
-
-
-
-
-
-
-
-
-
-
-
-
 *******************************************************************************;
 * Research Question 2 Analysis Starting Point;
 *******************************************************************************;
-
 /*
 Question 2 of 3: How does the rate of ESL learners affect chronic absenteeism 
 rates in California schools?
@@ -242,41 +151,22 @@ title2 justify=left
 'Rationale: This should help us understand which regions in the state are in greater need of resources earmarked for various social programs.'
 ;
 
+title3 justify=left
+"This table shows rates of chronic absenteeism among English learners and for the total population in 4736 California schools."
+;
+
 footnote1 justify=left
-"As before, I need to understand how to merge these tables into one dataset with just the county totals."
+"This should be the only file I need to carry out this analysis."
 ;
 
-/*
-This creates tables for each county summarizing chronic absenteeism.
-*/
-title3 justify=left
-'These tables summarize Chronic Absenteeism within Counties.'
-;
+options obs=10;
+proc print data=absentees_analytic;
+    var cdscode ESLAbsenteeRate TotalAbsenteeRate;
+run;
+options obs=max;
 
-proc sort data=Chronicabsenteeism_analytic out=temp; 
-    by CountyName;
-run;
-proc print data=temp;
-    var ChronicAbsenteeismCount;
-    sum ChronicAbsenteeismCount; 
-    by CountyName; 
-run;
-
-/*
-These tables show the total enrollment for each county.  
-*/
-title3 justify=left
-'These tables summarize Total Enrollment within Counties.'
-;
-
-proc sort data=Chronicabsenteeism_analytic out=temp; 
-    by CountyName;
-run;
-proc print data=temp;
-    var CumulativeEnrollment;
-    sum CumulativeEnrollment; 
-    by CountyName; 
-run;
+title;
+footnote;
 
 title;
 footnote;
@@ -304,13 +194,73 @@ Limitations: In the files "elsch19" and "fepsch19", missing values and zeros
 should be omitted from the LC column since they are potentially missing values. 
 The same is true for missing information in the CHRONICABSENTEEISMRATE column of
 the "chronicabsenteeism19" dataset.  
-
-need: 
-proportion of FEP students 
-proportion of EL students 
-chronic absenteesim rate   
 */
 
+/*
+This code sums the count of FEP and EL students within cdscodes. The result is 
+a dataset with one row for each cdscode containing the sums of the values of 
+interest.
+*/
+data FEPEL_counts(drop=COUNTY LC LANGUAGE TOTAL_EL TOTAL_FEP);
+    set fepel_analytic; 
+    by cdscode;
+    if First.cdscode then EL_Count=0;
+    EL_Count + Total_EL;
+    if Last.cdscode;
+    if First.cdscode then FEP_Count=0;
+    FEP_Count + Total_FEP;
+    if Last.cdscode;
+run;
+
+/*
+This chunk of code gets information from the chronic absenteeism analytic file
+and stores it in a temporary file.
+*/
+data chronic_abs_count(keep=cdscode ChronicAbsenteeismCount CumulativeEnrollment); 
+    set chronic_abs_analytic; 
+    where
+        reportingcategory="TA";
+run;
+
+/* This code chunk merges the temporary files created in the last two steps. */
+data fepel_abs_analytic;
+    merge 
+        FEPEL_counts
+        chronic_abs_count
+    ;
+    by
+        cdscode
+    ;
+run;
+
+/* Here I drop rows with missing values.*/
+data fepel_abs_analytic; 
+    set fepel_abs_analytic; 
+    ;
+    where
+        not(missing(EL_Count))
+        and
+        not(missing(FEP_Count))
+        and 
+        not(missing(CumulativeEnrollment))
+        and 
+        not(missing(ChronicAbsenteeismCount))
+        and 
+        CumulativeEnrollment^="*"
+        and 
+        ChronicAbsenteeismCount^="*"
+    ;
+run;
+
+/* Calculate rate columns. */
+data fepel_abs_analytic; 
+    set fepel_abs_analytic;
+    EL_Rate=EL_Count/CumulativeEnrollment;
+    FEP_Rate=FEP_Count/CumulativeEnrollment;
+    ChronicAbsenteeismRate=ChronicAbsenteeismCount/CumulativeEnrollment;
+run; 
+
+/*Print table*/
 title1 justify=left
 'Question 3 of 3: How does the relative proportion of FEP students to EL students affect the rate of chronic absenteesim in California schools?'
 ;
@@ -319,69 +269,18 @@ title2 justify=left
 'Rationale: This question would attempt to assess the relative rates of abenteeism between English Learners, and those who have successfully learned English. This information would help us understand whether successful ESL programs are effective in lowering chronic absenteeism.'
 ;
 
+title3 justify=left
+"This table contains count and rate information for EL and FEP students as well as chronic absenteeism rates for 9850 California schools."
+;
+
 footnote1 justify=left
-"."
+"This should be the only file I need to carry out this analysis."
 ;
 
-/* 
-Create a set of tables to look at the number of FEP students in each County
-*/
-title3 justify=left
-'These tables summarize the FEP students within Counties.'
-;
-
-
-/* 
-Create a set of tables to look at the number of ESL students in each County
-*/
-title3 justify=left
-'These tables summarize the ES students within Counties.'
-;
-
-
-/* 
-Create a set of tables to look at chronic absenteeism in each County
-*/
-title3 justify=left
-'These tables summarize chronic absenteeism within Counties.'
-;
-
+options obs=10;
+proc print data=fepel_abs_analytic;
+run; 
+options obs=max;
 
 title;
 footnote;
-
-
-
-
-
-
-
-
-
-
-data one; 
-input var1$ var2$; 
-cards; 
-1 2 
-2 3 
-3 5
-; 
-run; 
-
-data two; 
-input var1$ var3$; 
-cards; 
-1 3 
-2 5 
-4 6 
-;
-run; 
-
-data onetwo;
-merge one (rename=(var2=ball)) 
-    two; 
-by var1; 
-run; 
-
-proc print data=onetwo; 
-run;  
