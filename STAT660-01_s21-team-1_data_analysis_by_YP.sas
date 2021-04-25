@@ -130,17 +130,6 @@ Limitations: In the files "elsch19", missing values and zeros should be omitted
 from the LC column since they are potentially missing values. The same is true 
 for missing information in the CHRONICABSENTEEISMRATE column of the 
 "chronicabsenteeism19" dataset. 
-
-Need: 
-
-Chronic_abs_analytic:
-(cdscode & reportingcat=SE)
-/
-(cdscode & reportingcat=TA) 
-= 
-School ESL rate
-
-cdscode & reportingcat=TA: need column: chronicabsenteeismrate
 */
 
 title1 justify=left
