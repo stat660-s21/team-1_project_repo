@@ -313,7 +313,7 @@ Merge into one dataset.
 */
 data fepel_analytic; 
     merge 
-        fepsch19_temp 
+        fepsch19_temp (rename=(total=Total_FEP)) 
         elsch19_temp; 
     by 
         cdscode 
@@ -321,7 +321,7 @@ data fepel_analytic;
 run;  
 
 /*
-This second set of code chunks creates a usable ELASatrisk_analytic file.
+The next code chunk creates a usable ELASatrisk_analytic file.
 */
 data ELAS_atrisk_analytic;
     set ELASatrisk_analytic; 
@@ -336,7 +336,7 @@ data ELAS_atrisk_analytic;
 run; 
 
 /*
-This third set of code chunks creates a usable chronicabsentessism file.
+The final code chunk creates a usable chronicabsentessism file.
 */
 data Chronic_abs_analytic;
     set chronicabsenteeism_analytic; 
