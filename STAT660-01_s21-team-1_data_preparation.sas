@@ -155,8 +155,8 @@ https://github.com/stat660/team-1_project_repo/raw/main/data/chronicabsenteeism.
 
 /* 
 This code checks the elsch19_raw dataset for missing key values and removes 
-them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four
-features were all necessary to create a composite key for this set. 
+them. The composite key is CDSCODE and LANGUAGE. The two features were all
+necessary to create a composite key for this set. 
 */
 options firstobs=1;
 options OBS=max;
@@ -180,8 +180,8 @@ run;
 
 /* 
 This code checks the fepsch19_raw dataset for missing key values and removes 
-them. The composite key is COUNTY, DISTRICT, SCHOOL, and LANGUAGE. The four 
-features were all necessary to create a composite key for this set. 
+them. The composite key is CDSCODE and LANGUAGE. The two features were all 
+necessary to create a composite key for this set. 
 */
 options firstobs=1;
 options OBS=max;
@@ -205,9 +205,8 @@ run;
 
 /* 
 This code checks the ELASatrisk_raw dataset for missing key values and removes
-them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, GRADE and 
-GENDER. These features were all necessary to create a composite key for this 
-set. 
+them. The composite key is CDSCODE, GRADE and GENDER. These features were all
+necessary to create a composite key for this set. 
 */
 options firstobs=1;
 options OBS=max;
@@ -238,9 +237,8 @@ run;
 
 /* 
 This code checks the chronicabsenteeism_raw dataset for missing key values and 
-removes them. The composite key is COUNTYCODE, DISTRICTCODE, SCHOOLCODE, and 
-REPORTINGCATEGORY. These features were all necessary to create a composite key 
-for this set. 
+removes them. The composite key is CDSCODE, and REPORTINGCATEGORY. These two
+features were all necessary to create a composite key for this set. 
 */
 options firstobs=1;
 options OBS=max;
@@ -267,17 +265,15 @@ run;
 /*
 The following code combines all of the above datasets into sets usable for 
 all of our analyses. 
-
-
 */
 
 /*
 This first set of code chunks combines the files elsch19_analytic and 
-fepsch19_analytic into one file called fepel_analytic
+fepsch19_analytic into one file called fepel_analytic.
 */
 
 /*
-sort both sets by cdscode and lc
+Sort both sets by cdscode and lc.
 */
 proc sort data=elsch19_analytic out=elsch19_temp;
     by cdscode lc; 
@@ -313,7 +309,7 @@ data fepsch19_temp;
 run; 
 
 /*
-Merge into one dataset
+Merge into one dataset.
 */
 data fepel_analytic; 
     merge 
@@ -325,9 +321,32 @@ data fepel_analytic;
 run;  
 
 /*
-Creating a usable chronicabsentessism file:
+This second set of code chunks creates a usable ELASatrisk_analytic file.
+*/
+data ELA_Satrisk_analytic;
+    set ELASatrisk_analytic; 
+    keep 
+        cdscode
+        EO
+        IFEP 
+        EL
+        RFEP
+        TBD
+	;
+run; 
+
+/*
+This third set of code chunks creates a usable chronicabsentessism file.
 */
 data Chronic_abs_analytic;
     set chronicabsenteeism_analytic; 
+	keep 
+	    cdscode
+		countyname
+		reportingcategory
+		cumulativeenrollment
+        chronicabsenteeismcount
+        chronicabsenteeismrate
+	;
     if REPORTINGCATEGORY in ("SE", "SH", "TA");
 run; 
