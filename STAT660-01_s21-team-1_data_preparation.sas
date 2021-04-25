@@ -323,7 +323,7 @@ run;
 /*
 This second set of code chunks creates a usable ELASatrisk_analytic file.
 */
-data ELA_Satrisk_analytic;
+data ELAS_atrisk_analytic;
     set ELASatrisk_analytic; 
     keep 
         cdscode

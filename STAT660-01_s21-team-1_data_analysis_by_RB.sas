@@ -15,6 +15,103 @@ answer the research questions below
 */
 %include "&path.STAT660-01_s21-team-1_data_preparation.sas";
 
+*******************************************************************************;
+* Further Data Prepration for the Following Three Questions;
+*******************************************************************************;
+/* 
+For elsch19_analytic, the column CDSCODE is a primary key, but we cannot remove 
+directly duplicates of CDSCODE from the original table, because each school
+corresponds to multiple languages and we want to keep the language with the 
+highest total.
+
+After running the proc sql steps below, the new dataset elsch_analytic will have
+no duplicate/repeated unique id values, and all unique id values will corresond 
+to our experimental units of interests, which are California Schools. This means 
+the column CDSCODE in elsch_analytic is guranteed to be a primary key.
+*/
+proc sql;
+    create table elsch_analytic as
+	    select cdscode, lc, language, max(total_el) as totalnum
+		from elsch19_analytic
+		group by cdscode
+		having total_el=totalnum
+        order by cdscode;
+quit;
+
+
+/* 
+For fepsch19_analytic, the column CDSCODE is a primary key, but we cannot remove 
+directly duplicates of CDSCODE from the original table, because each school 
+corresponds to multiple languages and we want to keep the language with the 
+highest total.
+
+After running the proc sql steps below, the new dataset fepsch_analytic will have
+no duplicate/repeated unique id values, and all unique id values will corresond to
+our experimental units of interests, which are California Schools. This means the
+column CDSCODE in fepsch_analytic is guranteed to be a primary key.
+*/
+proc sql;
+    create table fepsch_analytic as
+	    select cdscode, lc, language, max(total) as totalnum
+		from fepsch19_analytic
+		group by cdscode
+		having total=totalnum
+        order by cdscode;
+quit;
+
+/* 
+For ELAS_atrisk_analytic, the column CDSCODE is a primary key, but we cannot 
+remove directly duplicates of CDSCODE from the original table, because each school
+corresponds to multiple rows and we want to keep the average values of these 
+duplicate rows.
+
+After running the proc sql steps below, the new dataset ELAS_analytic will have
+no duplicate/repeated unique id values, and all unique id values will corresond 
+to our experimental units of interests, which are California Schools. This means
+the column CDSCODE in ELAS_analytic is guranteed to be a primary key.
+*/
+proc sql;
+    create table ELAS_analytic as
+	    select cdscode, avg(EO) as EO format 4., avg(IFEP) as IFEP format 4., 
+               avg(EL) as EL format 4., avg(RFEP) as RFEP format 4., 
+               avg(TBD) as TBD format 4.
+		from ELAS_atrisk_analytic
+		group by cdscode
+        order by cdscode
+        ;
+quit;
+data ELAS_LTEL_AR_analytic;
+    set ELAS_analytic;
+	    abs=max(EO, IFEP, EL, RFEP, TBD);
+		rename=(abs)
+
+/* 
+For Chronic_abs_analytic, the column CDSCODE is a primary key, but we cannot
+remove directly duplicates of CDSCODE from the original table, because each 
+school name corresponds to multiple rows and we want to keep the average values 
+of these duplicate rows.
+
+After running the proc sql steps below, the new dataset Chrabs_rate_analytic will
+have no duplicate/repeated unique id values, and all unique id values will 
+corresond to our experimental units of interests, which are California Schools. 
+This means the column CDSCODE in Chrabs_rate_analytic is guranteed to be a 
+primary key.
+*/
+data Chrabs_rate_temp;
+    set Chronic_abs_analytic;
+	if chronicabsenteeismrate ^= "*";
+	    chrabsrate=input(chronicabsenteeismrate, best4.2);
+	drop chronicabsenteeismrate;
+	where REPORTINGCATEGORY = "TA";
+run;
+proc sql;
+    create table Chrabs_rate_analytic as
+	    select cdscode, avg(chrabsrate) as chrabsrate format 4.2
+		from Chrabs_rate_temp
+		group by cdscode
+        order by cdscode;
+quit;
+
 
 *******************************************************************************;
 * Research Question 1 Analysis Starting Point;
@@ -36,17 +133,74 @@ excluded from this analysis, since they are potentially missing data values.
 */
 
 proc sql;
-   create table elsch19_fepsch19_raw AS
-       select coalesce(E.SCHOOL, F.SCHOOL), E.LANGUAGE AS LANGUAGE_EL, E.TOTAL_EL, 
-              F.LANGUAGE AS LANGUAGE_FEP, F.TOTAL AS TOTAL_FEP
-       from elsch19_raw_analytic AS E full join fepsch19_analytic AS F
-       on E.SCHOOL=F.SCHOOL
-       group by SCHOOL;
+    create table fep_el_analytic_1 as
+	    select 
+            coalesce(E.cdscode, F.cdscode)
+			as CDSCode,
+            coalesce(E.lc, F.lc)
+			as LC
+            label "Language Identification Code",,
+			E.language as language_EL 
+            label "Language Name Spoken by the Most EL",
+			E.totalnum as total_EL 
+            label "Total Number of EL Speaking that Selected Language",
+			F.language as language_FEP 
+            label "Language spoken by the most FEP",
+			F.totalnum as total_FEP
+            label "Total Number of FEP Speaking that Selected Language",
+		from elsch_analytic as E
+		    full join
+            fepsch_analytic as F
+			on E.cdscode=F.cdscode
+        order by CDSCode
+	;
 quit;
-title "All Languages spkoen by EL and FEP in Different Schools";
-proc print data=elsch19_fepsch19_raw(obs=5); 
+
+
+/* Build analytic dataset from raw datasets imported above including only the 
+columns and minimal data-cleaning/transforamtion needed to address the first
+queation/objective.*/
+proc sql;
+    create table fep_el_analytic_2 as
+	    select cdscode, lc, language, max(total_el) as totalnum_EL,
+               max(total) as totalnum_FEP
+		from fepel_analytic
+		group by cdscode
+		having total_el=totalnum_EL | total=totalnum_FEP
+        order by cdscode;
+quit;
+
+/* 
+Check fep_el_analytic2 for bad unique id values, where the column cdscode
+is intended to be a primary key.
+
+After executing this data step, the resulting dataset is emptywe, meaning
+that full joins used above didn't introduce duplicates in the 
+fep_el_analytic2. So we can do further proceeding.
+*/
+data fep_el_analytic_2_bad_ids;
+    set fep_el_analytic_2;
+	by cdscode;
+	if
+        first.cdscode * last.cddscode = 0
+        or
+        missing(cdscode)
+        or
+        substr(cdscode,8,7) in ("00000000", "0000001")
+	then
+	    do;
+		    output;
+		end;
 run;
-title;
+proc sort
+        nodupkey
+        data=fep_el_analytic_2
+        dupout=fep_el_analytic_2_dups
+    ;
+    by
+		cdscode
+    ;
+run;
 
 *******************************************************************************;
 * Research Question 2 Analysis Starting Point;
@@ -67,25 +221,28 @@ missing data values. And only values of "AggregateLevel" eaqul to "S" should be
 included in this analysis, since these rows contain SchoolName information.
 */
 
+/* Build analytic dataset from raw datasets imported above including only 
+the columns and minimal data-cleaning/transforamtion needed to address this
+research queation/objective.*/
 proc sql;
-   create table chronicabsenteeism_filter AS
-       select SchoolName AS SCHOOL, 
-              avg(ChronicAbsenteeismRate) AS Average_ChronicAbsenteeismRate 
-       from chronicabsenteeism_analytic
-       group by SCHOOL
-       order by SCHOOL;
+    create table el_chrabsrate_analytic as
+	    select 
+            coalesce(E.cdscode, C.cdscode)
+			as CDSCode,
+			E.language as language_EL 
+            label"Language Spoken by the Most EL",
+			E.totalnum as total_EL 
+            label"Total Number of EL Speaking that Selected Language",
+			C.chrabsrate as chrabs_rate
+			label"Chronic Absenteeism Rate"
+		    from elsch_analytic as E
+		    full join
+            Chrabs_rate_analytic as C
+            on E.cdscode=C.cdscode
+        order by cdscode
+	;
 quit;
-proc sql;
-   create table elsch19_chronicabsenteeism_raw AS
-       select coalesce(E.SCHOOL, C.SCHOOL), E.LANGUAGE AS LANGUAGE_EL, E.TOTAL_EL, 
-              C.Average_ChronicAbsenteeismRate
-       from elsch19_raw_analytic AS E full join chronicabsenteeism_filter AS C
-       on E.SCHOOL=C.SCHOOL;
-quit;
-title "Language Information of EL and Their Chronic Absenteeism Rate";
-proc print data=elsch19_chronicabsenteeism_raw(obs=5); 
-run;
-title;
+
 
 *******************************************************************************;
 * Research Question 3 Analysis Starting Point;
@@ -107,22 +264,33 @@ analysis, since they are potentially missing data values. And only values of
 "AggLEvel" and "AggregateLevel" eaqul to "S" should be included in this analysis, 
 since these rows contain SchoolName information.
 */
+
+/* Build analytic dataset from raw datasets imported above including only 
+the columns and minimal data-cleaning/transforamtion needed to address this
+research queation/objective.*/
 proc sql;
-   create table ELASatrisk_filter AS
-       select SchoolName AS SCHOOL, 
-              EO,IFEP,EL,RFEP,TBD
-       from ELASatrisk_analytic
-       group by SCHOOL
-       order by SCHOOL;
+    create table Chrabsrate_ELAS_analytic as
+	    select 
+            coalesce(S.cdscode, C.cdscode)
+			as CDSCode,
+            S.EO as EO_num
+            label"Total Number of EO",
+            S.IFEP as IFEP_num
+            label"Total Number of IFEP", 
+            S.EL as EL_num 
+			label"Total Number of EL",
+            S.RFEP as RFEP_num
+			label"Total Number of RFEP",
+            S.TBD as TBD_num
+			label"Total Number of TBD",
+			C.chrabsrate as chrabs_rate
+			label"Chronic Absenteeism Rate"
+		from 
+            ELAS_analytic as S
+			full join
+            Chrabs_rate_analytic as C
+            on S.cdscode=C.cdscode
+        order by cdscode
+	;
 quit;
-proc sql;
-   create table ELASatrisk_chroabsent_raw AS
-       select coalesce(S.SCHOOL, C.SCHOOL), EO,IFEP,EL,RFEP,TBD, 
-              C.Average_ChronicAbsenteeismRate
-       from ELASatrisk_filter AS S full join chronicabsenteeism_filter AS C
-       on S.SCHOOL=C.SCHOOL;
-quit;
-title "Students Type and Their Chronic Absenteeism Rate in Each School";
-proc print data=ELASatrisk_chroabsent_raw(obs=5); 
-run;
-title;
+
