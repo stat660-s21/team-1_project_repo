@@ -332,7 +332,7 @@ data ELA_Satrisk_analytic;
         EL
         RFEP
         TBD
-	;
+    ;
 run; 
 
 /*
@@ -340,13 +340,13 @@ This third set of code chunks creates a usable chronicabsentessism file.
 */
 data Chronic_abs_analytic;
     set chronicabsenteeism_analytic; 
-	keep 
-	    cdscode
-		countyname
-		reportingcategory
-		cumulativeenrollment
+    keep 
+        cdscode
+        countyname
+        reportingcategory
+        cumulativeenrollment
         chronicabsenteeismcount
         chronicabsenteeismrate
-	;
+    ;
     if REPORTINGCATEGORY in ("SE", "SH", "TA");
 run; 
