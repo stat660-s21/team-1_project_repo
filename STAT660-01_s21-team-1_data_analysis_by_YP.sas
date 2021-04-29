@@ -37,54 +37,6 @@ Limitations: Edited (4/24): this question can actually be addressed using only
 the chronic_abs_analytic file: 
 */
 
-/*
-Here I create a single dataset with all of the information needed to address
-this question. The file it outputs contains only the cdscode, rate of chronic
-absenteeism among English learners, rate of absenteeism among homeless students,
-and rates of absenteeism among the entire school population.  
-*/ 
-data homeless_absentees;
-    set Chronic_abs_analytic;
-    where ReportingCategory = "SH";
-data esl_absentees;
-    set Chronic_abs_analytic;
-    where ReportingCategory = "SE";
-data tot_absentees;
-    set Chronic_abs_analytic;
-    where ReportingCategory = "TA";
-data absentees_temp;
-    merge 
-        esl_absentees (rename=(ChronicAbsenteeismRate=ESLAbsenteeRate))
-        homeless_absentees (rename=(ChronicAbsenteeismRate=HomelessAbsenteeRate))
-        tot_absentees (rename=(ChronicAbsenteeismRate=TotalAbsenteeRate))
-    ;
-    by cdscode;
-run; 
-
-data absentees_analytic; 
-    set absentees_temp; 
-    ;
-    where
-        not(missing(ESLAbsenteeRate))
-        and
-        not(missing(HomelessAbsenteeRate))
-        and 
-        not(missing(TotalAbsenteeRate))
-        and
-        ESLAbsenteeRate^="*" 
-        and 
-        HomelessAbsenteeRate^="*"
-        and 
-        TotalAbsenteeRate^="*"
-    ;
-    drop 
-        ReportingCategory
-        CumulativeEnrollment
-        ChronicAbsenteeismCount
-        CountyName
-    ;       
-run;
-
 title1 justify=left
 'Question 1 of 3: How do rates of homeless students and rates of ESL learners interact in California schools?'
 ;
@@ -157,9 +109,6 @@ options obs=max;
 title;
 footnote;
 
-title;
-footnote;
-
 *******************************************************************************;
 * Research Question 3 Analysis Starting Point;
 *******************************************************************************;
@@ -185,69 +134,11 @@ The same is true for missing information in the CHRONICABSENTEEISMRATE column of
 the "chronicabsenteeism19" dataset.  
 */
 
-/*
-This code sums the count of FEP and EL students within cdscodes. The result is 
-a dataset with one row for each cdscode containing the sums of the values of 
-interest.
-*/
-data FEPEL_counts(drop=COUNTY LC LANGUAGE TOTAL_EL TOTAL_FEP);
-    set fepel_analytic; 
-    by cdscode;
-    if First.cdscode then EL_Count=0;
-    EL_Count + Total_EL;
-    if Last.cdscode;
-    if First.cdscode then FEP_Count=0;
-    FEP_Count + Total_FEP;
-    if Last.cdscode;
-run;
 
-/*
-This chunk of code gets information from the chronic absenteeism analytic file
-and stores it in a temporary file.
-*/
-data chronic_abs_count(keep=cdscode ChronicAbsenteeismCount CumulativeEnrollment); 
-    set chronic_abs_analytic; 
-    where
-        reportingcategory="TA";
-run;
 
-/* This code chunk merges the temporary files created in the last two steps. */
-data fepel_abs_analytic;
-    merge 
-        FEPEL_counts
-        chronic_abs_count
-    ;
-    by
-        cdscode
-    ;
-run;
 
-/* Here I drop rows with missing values.*/
-data fepel_abs_analytic; 
-    set fepel_abs_analytic; 
-    ;
-    where
-        not(missing(EL_Count))
-        and
-        not(missing(FEP_Count))
-        and 
-        not(missing(CumulativeEnrollment))
-        and 
-        not(missing(ChronicAbsenteeismCount))
-        and 
-        CumulativeEnrollment^="*"
-        and 
-        ChronicAbsenteeismCount^="*"
-    ;
-run;
 
-/* Calculate rate columns. */
-data fepel_abs_analytic; 
-    set fepel_abs_analytic;
-    EL_Rate=EL_Count/CumulativeEnrollment;
-    FEP_Rate=FEP_Count/CumulativeEnrollment;
-    ChronicAbsenteeismRate=ChronicAbsenteeismCount/CumulativeEnrollment;
-run; 
+
 
 /*Print table*/
 title1 justify=left
