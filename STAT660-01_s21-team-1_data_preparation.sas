@@ -340,10 +340,10 @@ the column CDSCODE in elsch_analytic is guranteed to be a primary key.
 */
 proc sql;
     create table elsch_analytic as
-	    select cdscode, lc, language, max(total_el) as totalnum
-		from elsch19_nodups
-		group by cdscode
-		having total_el=totalnum
+        select cdscode, lc, language, max(total_el) as totalnum
+        from elsch19_nodups
+        group by cdscode
+        having total_el=totalnum
         order by cdscode;
 quit;
 
@@ -360,10 +360,10 @@ column CDSCODE in fepsch_analytic is guranteed to be a primary key.
 */
 proc sql;
     create table fepsch_analytic as
-	    select cdscode, lc, language, max(total) as totalnum
-		from fepsch19_nodups
-		group by cdscode
-		having total=totalnum
+        select cdscode, lc, language, max(total) as totalnum
+        from fepsch19_nodups
+        group by cdscode
+        having total=totalnum
         order by cdscode;
 quit;
 
@@ -379,18 +379,18 @@ the column CDSCODE in ELAS_analytic is guranteed to be a primary key.
 */
 proc sql;
     create table ELAS_analytic as
-	    select cdscode, avg(EO) as EO format 4., avg(IFEP) as IFEP format 4., 
+        select cdscode, avg(EO) as EO format 4., avg(IFEP) as IFEP format 4., 
                avg(EL) as EL format 4., avg(RFEP) as RFEP format 4., 
                avg(TBD) as TBD format 4.
-		from ELAS_atrisk
-		group by cdscode
+        from ELAS_atrisk
+        group by cdscode
         order by cdscode
         ;
 quit;
 data ELAS_LTEL_AR_analytic;
     set ELAS_analytic;
-	    abs=max(EO, IFEP, EL, RFEP, TBD);
-		rename=(abs)
+        abs=max(EO, IFEP, EL, RFEP, TBD);
+        rename=(abs)
 
 /* 
 For Chronic_abs, the column CDSCODE is a primary key, but we cannot
@@ -405,16 +405,16 @@ primary key.
 */
 data Chrabs_rate_temp;
     set Chronic_abs;
-	if chronicabsenteeismrate ^= "*";
-	    chrabsrate=input(chronicabsenteeismrate, best4.2);
-	drop chronicabsenteeismrate;
-	where REPORTINGCATEGORY = "TA";
+    if chronicabsenteeismrate ^= "*";
+        chrabsrate=input(chronicabsenteeismrate, best4.2);
+    drop chronicabsenteeismrate;
+    where REPORTINGCATEGORY = "TA";
 run;
 proc sql;
     create table Chrabs_rate_analytic as
-	    select cdscode, avg(chrabsrate) as chrabsrate format 4.2
-		from Chrabs_rate_temp
-		group by cdscode
+        select cdscode, avg(chrabsrate) as chrabsrate format 4.2
+        from Chrabs_rate_temp
+        group by cdscode
         order by cdscode;
 quit;
 
@@ -501,13 +501,29 @@ run;
 This chunk of code gets information from the chronic absenteeism analytic file
 and stores it in a temporary file.
 */
-data chronic_abs_count(keep=cdscode ChronicAbsenteeismCount CumulativeEnrollment); 
+data chronic_abs_tot(keep=cdscode ChronicAbsenteeismCount CumulativeEnrollment); 
     set chronic_abs; 
     where
         reportingcategory="TA";
+data chronic_abs_homeless(keep=cdscode ChronicAbsenteeismCount CumulativeEnrollment); 
+    set chronic_abs; 
+    where
+        reportingcategory="SH";
+data chronic_abs_count;
+    merge 
+        chronic_abs_tot (rename=(ChronicAbsenteeismCount=TotalChronicAbsenteeismCount
+                                 CumulativeEnrollment=TotalCumulativeEnrollment))
+        chronic_abs_homeless (rename=(ChronicAbsenteeismCount=HLessChronicAbsenteeismCount
+                                 CumulativeEnrollment=HLessCumulativeEnrollment))
+    ;
 run;
 
+
 /* This code chunk merges the temporary files created in the last two steps. */
+proc sort data=FEPEL_counts;
+    by cdscode;
+proc sort data=chronic_abs_count;
+    by cdscode;
 data fepel_abs;
     merge 
         FEPEL_counts
@@ -527,22 +543,32 @@ data fepel_abs;
         and
         not(missing(FEP_Count))
         and 
-        not(missing(CumulativeEnrollment))
+        not(missing(TotalCumulativeEnrollment))
         and 
-        not(missing(ChronicAbsenteeismCount))
+        not(missing(TotalChronicAbsenteeismCount))
+        and
+        not(missing(HLessCumulativeEnrollment))
         and 
-        CumulativeEnrollment^="*"
+        not(missing(HLessChronicAbsenteeismCount))
         and 
-        ChronicAbsenteeismCount^="*"
+        TotalCumulativeEnrollment^="*"
+        and 
+        TotalChronicAbsenteeismCount^="*"
+        and 
+        HLessCumulativeEnrollment^="*"
+        and 
+        HLessChronicAbsenteeismCount^="*"
     ;
 run;
 
 /* Calculate rate columns. */
 data fepel_abs; 
     set fepel_abs;
-    EL_Rate=EL_Count/CumulativeEnrollment;
-    FEP_Rate=FEP_Count/CumulativeEnrollment;
-    ChronicAbsenteeismRate=ChronicAbsenteeismCount/CumulativeEnrollment;
+    EL_Rate=EL_Count/TotalCumulativeEnrollment;
+    FEP_Rate=FEP_Count/TotalCumulativeEnrollment;
+    Homeless_Rate=HLessCumulativeEnrollment/TotalCumulativeEnrollment;
+    ChronicAbsentee_Rate=TotalChronicAbsenteeismCount/TotalCumulativeEnrollment;
+    FEPtoELratio=FEP_Count/EL_Count;
 run; 
 
 /* Merge fepel_abs with absentees to create final analytic file. */
@@ -557,6 +583,7 @@ run;
 
 
 /* Delete temporary files. */
+
 proc datasets library=work nolist;
     delete 
         Absentees
@@ -566,6 +593,8 @@ proc datasets library=work nolist;
         Chronicabsenteeism_raw_dups
         Chronic_abs
         Chronic_abs_count
+        Chronic_abs_homeless
+        Chronic_abs_tot
         Elasatrisk_nodups
         Elasatrisk_raw
         Elasatrisk_raw_dups
