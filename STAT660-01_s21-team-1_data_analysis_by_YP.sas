@@ -56,6 +56,12 @@ options obs=max;
 title;
 footnote;
 
+options obs=10;
+proc print data=by_school_analytic noobs;
+    
+run;
+options obs=max;
+
 *******************************************************************************;
 * Research Question 2 Analysis Starting Point;
 *******************************************************************************;
