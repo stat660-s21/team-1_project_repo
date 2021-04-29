@@ -438,7 +438,7 @@ data tot_absentees;
     where ReportingCategory = "TA";
 data absentees_temp;
     merge 
-        esl_absentees (rename=(ChronicAbsenteeismRate=ESLAbsenteeRate))
+        esl_absentees (rename=(ChronicAbsenteeismRate=ELAbsenteeRate))
         homeless_absentees (rename=(ChronicAbsenteeismRate=HomelessAbsenteeRate))
         tot_absentees (rename=(ChronicAbsenteeismRate=TotalAbsenteeRate))
     ;
@@ -449,13 +449,13 @@ data absentees;
     set absentees_temp; 
     ;
     where
-        not(missing(ESLAbsenteeRate))
+        not(missing(ELAbsenteeRate))
         and
         not(missing(HomelessAbsenteeRate))
         and 
         not(missing(TotalAbsenteeRate))
         and
-        ESLAbsenteeRate^="*" 
+        ELAbsenteeRate^="*" 
         and 
         HomelessAbsenteeRate^="*"
         and 
