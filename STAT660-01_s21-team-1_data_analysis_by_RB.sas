@@ -15,102 +15,6 @@ answer the research questions below
 */
 %include "&path.STAT660-01_s21-team-1_data_preparation.sas";
 
-*******************************************************************************;
-* Further Data Prepration for the Following Three Questions;
-*******************************************************************************;
-/* 
-For elsch19_analytic, the column CDSCODE is a primary key, but we cannot remove 
-directly duplicates of CDSCODE from the original table, because each school
-corresponds to multiple languages and we want to keep the language with the 
-highest total.
-
-After running the proc sql steps below, the new dataset elsch_analytic will have
-no duplicate/repeated unique id values, and all unique id values will corresond 
-to our experimental units of interests, which are California Schools. This means 
-the column CDSCODE in elsch_analytic is guranteed to be a primary key.
-*/
-proc sql;
-    create table elsch_analytic as
-	    select cdscode, lc, language, max(total_el) as totalnum
-		from elsch19_analytic
-		group by cdscode
-		having total_el=totalnum
-        order by cdscode;
-quit;
-
-
-/* 
-For fepsch19_analytic, the column CDSCODE is a primary key, but we cannot remove 
-directly duplicates of CDSCODE from the original table, because each school 
-corresponds to multiple languages and we want to keep the language with the 
-highest total.
-
-After running the proc sql steps below, the new dataset fepsch_analytic will have
-no duplicate/repeated unique id values, and all unique id values will corresond to
-our experimental units of interests, which are California Schools. This means the
-column CDSCODE in fepsch_analytic is guranteed to be a primary key.
-*/
-proc sql;
-    create table fepsch_analytic as
-	    select cdscode, lc, language, max(total) as totalnum
-		from fepsch19_analytic
-		group by cdscode
-		having total=totalnum
-        order by cdscode;
-quit;
-
-/* 
-For ELAS_atrisk_analytic, the column CDSCODE is a primary key, but we cannot 
-remove directly duplicates of CDSCODE from the original table, because each school
-corresponds to multiple rows and we want to keep the average values of these 
-duplicate rows.
-
-After running the proc sql steps below, the new dataset ELAS_analytic will have
-no duplicate/repeated unique id values, and all unique id values will corresond 
-to our experimental units of interests, which are California Schools. This means
-the column CDSCODE in ELAS_analytic is guranteed to be a primary key.
-*/
-proc sql;
-    create table ELAS_analytic as
-	    select cdscode, avg(EO) as EO format 4., avg(IFEP) as IFEP format 4., 
-               avg(EL) as EL format 4., avg(RFEP) as RFEP format 4., 
-               avg(TBD) as TBD format 4.
-		from ELAS_atrisk_analytic
-		group by cdscode
-        order by cdscode
-        ;
-quit;
-data ELAS_LTEL_AR_analytic;
-    set ELAS_analytic;
-	    abs=max(EO, IFEP, EL, RFEP, TBD);
-		rename=(abs)
-
-/* 
-For Chronic_abs_analytic, the column CDSCODE is a primary key, but we cannot
-remove directly duplicates of CDSCODE from the original table, because each 
-school name corresponds to multiple rows and we want to keep the average values 
-of these duplicate rows.
-
-After running the proc sql steps below, the new dataset Chrabs_rate_analytic will
-have no duplicate/repeated unique id values, and all unique id values will 
-corresond to our experimental units of interests, which are California Schools. 
-This means the column CDSCODE in Chrabs_rate_analytic is guranteed to be a 
-primary key.
-*/
-data Chrabs_rate_temp;
-    set Chronic_abs_analytic;
-	if chronicabsenteeismrate ^= "*";
-	    chrabsrate=input(chronicabsenteeismrate, best4.2);
-	drop chronicabsenteeismrate;
-	where REPORTINGCATEGORY = "TA";
-run;
-proc sql;
-    create table Chrabs_rate_analytic as
-	    select cdscode, avg(chrabsrate) as chrabsrate format 4.2
-		from Chrabs_rate_temp
-		group by cdscode
-        order by cdscode;
-quit;
 
 
 *******************************************************************************;
@@ -131,7 +35,6 @@ column of the same name from fepsch19.
 Limitations: Values of "Language" and "School" equal to zero or empty should be 
 excluded from this analysis, since they are potentially missing data values.
 */
-
 proc sql;
     create table fep_el_analytic_1 as
 	    select 

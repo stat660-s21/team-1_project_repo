@@ -349,34 +349,102 @@ data Chronic_abs_analytic;
 run; 
 
 
+*******************************************************************************;
+* Further Data Prepration for the Three Questions from Ran Bian;
+*******************************************************************************;
+/* 
+For elsch19_analytic, the column CDSCODE is a primary key, but we cannot remove 
+directly duplicates of CDSCODE from the original table, because each school
+corresponds to multiple languages and we want to keep the language with the 
+highest total.
 
-
-
-
-
-
-
-
-
-
-/*
-Hi Ran, 
-
-I think the easiest way to do it so that we both get our files and we still 
-produce the fewest number of files is to just put all of my data prep steps 
-in here. Then you can see what files I've created and if you can use them then 
-we don;t need more, and if you can add to them to use them then that also works.
-
-I put my data processing below. I've created two seperate files: 
-
-One has EL and FEP students summarized at the school level:  
-
-
-We just want as few files as possible at the end of this prep step.
-
-Cheers, 
-Yale
+After running the proc sql steps below, the new dataset elsch_analytic will have
+no duplicate/repeated unique id values, and all unique id values will corresond 
+to our experimental units of interests, which are California Schools. This means 
+the column CDSCODE in elsch_analytic is guranteed to be a primary key.
 */
+proc sql;
+    create table elsch_analytic as
+	    select cdscode, lc, language, max(total_el) as totalnum
+		from elsch19_analytic
+		group by cdscode
+		having total_el=totalnum
+        order by cdscode;
+quit;
+
+
+/* 
+For fepsch19_analytic, the column CDSCODE is a primary key, but we cannot remove 
+directly duplicates of CDSCODE from the original table, because each school 
+corresponds to multiple languages and we want to keep the language with the 
+highest total.
+
+After running the proc sql steps below, the new dataset fepsch_analytic will have
+no duplicate/repeated unique id values, and all unique id values will corresond to
+our experimental units of interests, which are California Schools. This means the
+column CDSCODE in fepsch_analytic is guranteed to be a primary key.
+*/
+proc sql;
+    create table fepsch_analytic as
+	    select cdscode, lc, language, max(total) as totalnum
+		from fepsch19_analytic
+		group by cdscode
+		having total=totalnum
+        order by cdscode;
+quit;
+
+/* 
+For ELAS_atrisk_analytic, the column CDSCODE is a primary key, but we cannot 
+remove directly duplicates of CDSCODE from the original table, because each school
+corresponds to multiple rows and we want to keep the average values of these 
+duplicate rows.
+
+After running the proc sql steps below, the new dataset ELAS_analytic will have
+no duplicate/repeated unique id values, and all unique id values will corresond 
+to our experimental units of interests, which are California Schools. This means
+the column CDSCODE in ELAS_analytic is guranteed to be a primary key.
+*/
+proc sql;
+    create table ELAS_analytic as
+	    select cdscode, avg(EO) as EO format 4., avg(IFEP) as IFEP format 4., 
+               avg(EL) as EL format 4., avg(RFEP) as RFEP format 4., 
+               avg(TBD) as TBD format 4.
+		from ELAS_atrisk_analytic
+		group by cdscode
+        order by cdscode
+        ;
+quit;
+data ELAS_LTEL_AR_analytic;
+    set ELAS_analytic;
+	    abs=max(EO, IFEP, EL, RFEP, TBD);
+		rename=(abs)
+
+/* 
+For Chronic_abs_analytic, the column CDSCODE is a primary key, but we cannot
+remove directly duplicates of CDSCODE from the original table, because each 
+school name corresponds to multiple rows and we want to keep the average values 
+of these duplicate rows.
+
+After running the proc sql steps below, the new dataset Chrabs_rate_analytic will
+have no duplicate/repeated unique id values, and all unique id values will 
+corresond to our experimental units of interests, which are California Schools. 
+This means the column CDSCODE in Chrabs_rate_analytic is guranteed to be a 
+primary key.
+*/
+data Chrabs_rate_temp;
+    set Chronic_abs_analytic;
+	if chronicabsenteeismrate ^= "*";
+	    chrabsrate=input(chronicabsenteeismrate, best4.2);
+	drop chronicabsenteeismrate;
+	where REPORTINGCATEGORY = "TA";
+run;
+proc sql;
+    create table Chrabs_rate_analytic as
+	    select cdscode, avg(chrabsrate) as chrabsrate format 4.2
+		from Chrabs_rate_temp
+		group by cdscode
+        order by cdscode;
+quit;
 
 
 
@@ -431,17 +499,14 @@ run;
 
 
 
-
-
-
-
-
+*******************************************************************************;
+* Further Data Prepration for the Three Questions from Yale Paulsen;
+*******************************************************************************;
 /*
 For my third question I needed another file that summarizes the number of fep 
 and el students in each school. 
 
 The file created below (fepel_abs_analytic) has that summarized data. 
-
 */
 
 
@@ -508,36 +573,3 @@ data fepel_abs_analytic;
     FEP_Rate=FEP_Count/CumulativeEnrollment;
     ChronicAbsenteeismRate=ChronicAbsenteeismCount/CumulativeEnrollment;
 run; 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-The next set of code chunks summarizes data in the fepel file and then merges it 
-with the chronicabsenteeism file to create a new file callled fepel_abs which 
-aggregates information from three of our four datasets and allows us to answer
-
-*/
-
-
-
-
-
-
-
-
