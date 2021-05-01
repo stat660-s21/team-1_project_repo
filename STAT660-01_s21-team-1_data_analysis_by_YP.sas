@@ -22,19 +22,13 @@ answer the research questions below
 /*
 Question 1 of 3: How do rates of homeless students and rates of ESL learners 
 interact in California at the School level? 
-
 Rationale: This should help us understand which regions in the state are in 
 greater need of resources earmarked for various social programs.
-
 Notes: 
-This compares the column "Repoting category" from chronicabsenteeism19 
-to the column "LC" in the "elsch19" file. 
-Changed question to address Counties instead of Districts since that will 
-be more accessible with these datasets.
-Changed Question again to address schools since it's now possible.  
-
-Limitations: Edited (4/24): this question can actually be addressed using only 
-the chronic_abs_analytic file: 
+This compares the columns EL_Rate and Homeless_Rate in the by_school_analytic
+file. 
+Limitations: Edited (4/29): This question can now be addressed using only the 
+by_school_analytic file. 
 */
 
 title1 justify=left
@@ -46,7 +40,7 @@ title2 justify=left
 ;
 
 title3 justify=left
-"This table shows rates of chronic absenteeism among homeless students, English learners, and for the total population in 4736 California schools."
+"This table shows rates of chronic absenteeism among homeless students, English learners, and for the total population in 4886 California schools."
 ;
 
 footnote1 justify=left
@@ -54,7 +48,8 @@ footnote1 justify=left
 ;
 
 options obs=10;
-proc print data=absentees_analytic;
+proc print data=by_school_analytic noobs;
+    var cdscode EL_Rate Homeless_Rate;
 run;
 options obs=max;
 
@@ -67,21 +62,13 @@ footnote;
 /*
 Question 2 of 3: How does the rate of ESL learners affect chronic absenteeism 
 rates in California schools?
-
 Rationale: This information will further help to identify regions in greater 
 need of funding from the state.  
-
 Notes: 
-This compares the column "LC" in the "elsch19" file to the 
-column "Chronic Absenteeism Rate" in the "chronicabsenteeism19" datafile.
-Changed question to address Counties instead of Districts since that will be 
-more accessible with these datasets.
-Changed Question again to address schools since it's now possible.  
-
-Limitations: In the files "elsch19", missing values and zeros should be omitted 
-from the LC column since they are potentially missing values. The same is true 
-for missing information in the CHRONICABSENTEEISMRATE column of the 
-"chronicabsenteeism19" dataset. 
+This compares the columns EL_Rate and ChronicAbsentee_Rate in the 
+by_school_analytic file. 
+Limitations: Edited (4/29): This question can now be addressed using only the 
+by_school_analytic file. 
 */
 
 title1 justify=left
@@ -93,7 +80,7 @@ title2 justify=left
 ;
 
 title3 justify=left
-"This table shows rates of chronic absenteeism among English learners and for the total population in 4736 California schools."
+"This table shows rates of chronic absenteeism among English learners and for the total population in 4886 California schools."
 ;
 
 footnote1 justify=left
@@ -101,8 +88,8 @@ footnote1 justify=left
 ;
 
 options obs=10;
-proc print data=absentees_analytic;
-    var cdscode ESLAbsenteeRate TotalAbsenteeRate;
+proc print data=by_school_analytic noobs;
+    var cdscode EL_Rate ChronicAbsentee_Rate;
 run;
 options obs=max;
 
@@ -115,30 +102,16 @@ footnote;
 /*
 Question 3 of 3: How does the relative proportion of FEP students to EL 
 students affect the rate of chronic absenteesim in California schools? 
-
 Rationale: This question would attempt to assess the relative rates of 
 abenteeism between English Learners, and those who have successfully learned 
 English. This knowledge would help us understand whether successful ESL programs
 are effective in lowering absenteeism.    
-
 Note: 
-This compares the column "LC" in the "elsch19" and "fepsch19" files to the 
-column "Chronic Absenteeism Rate" in the "chronicabsenteeism19" datafile.
-Changed question to address Counties instead of Districts since that will be 
-more accessible with these datasets.
-Changed Question again to address schools since it's now possible.
-
-Limitations: In the files "elsch19" and "fepsch19", missing values and zeros 
-should be omitted from the LC column since they are potentially missing values. 
-The same is true for missing information in the CHRONICABSENTEEISMRATE column of
-the "chronicabsenteeism19" dataset.  
+This compares the columns FEPtoELratio and ChronicAbsentee_Rate in the 
+by_school_analytic file. 
+Limitations: Edited (4/29): This question can now be addressed using only the 
+by_school_analytic file.  
 */
-
-
-
-
-
-
 
 /*Print table*/
 title1 justify=left
@@ -150,7 +123,7 @@ title2 justify=left
 ;
 
 title3 justify=left
-"This table contains count and rate information for EL and FEP students as well as chronic absenteeism rates for 9850 California schools."
+"This table contains count and rate information for EL and FEP students as well as chronic absenteeism rates for 4886 California schools."
 ;
 
 footnote1 justify=left
@@ -158,9 +131,13 @@ footnote1 justify=left
 ;
 
 options obs=10;
-proc print data=fepel_abs_analytic;
-run; 
+proc print data=by_school_analytic noobs;
+    var cdscode FEPtoELratio ChronicAbsentee_Rate;
+run;
 options obs=max;
 
 title;
 footnote;
+
+proc contents data=by_school_analytic; 
+run; 
