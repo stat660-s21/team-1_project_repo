@@ -387,10 +387,13 @@ proc sql;
         order by cdscode
         ;
 quit;
-data ELAS_LTEL_AR_analytic;
+data ELAS_LTEL_AR_analytic(rename=(maxvar=type) drop=EO IFEP EL RFEP TBD);
     set ELAS_analytic;
-        abs=max(EO, IFEP, EL, RFEP, TBD);
-        rename=(abs)
+        array v EO IFEP EL RFEP TBD;
+		maxvalue = max(of v(*));
+        length maxvar $4.;
+		maxvar = vname(v[whichn(maxvalue, of v(*))]);    
+run;
 
 /* 
 For Chronic_abs, the column CDSCODE is a primary key, but we cannot
@@ -418,7 +421,48 @@ proc sql;
         order by cdscode;
 quit;
 
+/* Merge all analytic files to create one final analytic file. */
+proc sql;
+    create table Whole_School_analytic as
+        select 
+            coalesce(E.cdscode, F.cdscode, C.cdscode, EL.cdscode)
+			as CDSCode,
+			E.language as language_EL 
+            label "Language Name Spoken by the Most EL",
+			E.totalnum as total_EL 
+            label "Total Number of EL Speaking that Selected Language",
+			F.language as language_FEP 
+            label "Language spoken by the most FEP",
+			F.totalnum as total_FEP
+            label "Total Number of FEP Speaking that Selected Language",
+			C.chrabsrate as chrabs_rate
+			label "Chronic Absenteeism Rate",
+			EL.type as student_type
+            label "The Most Common Type of Students"
+		from elsch_analytic as E
+		    full join
+            fepsch_analytic as F
+			on E.cdscode=F.cdscode
+			full join
+            Chrabs_rate_analytic as C
+            on E.cdscode=C.cdscode
+			full join
+			ELAS_LTEL_AR_analytic as EL
+            on E.cdscode=EL.cdscode
+        order by CDSCode
+	;
+quit;
+	    
 
+
+*******************************************************************************;
+* Further Data Prepration for the Three Questions from Yale Paulsen;
+*******************************************************************************;
+/*
+For my third question I needed another file that summarizes the number of fep 
+and el students in each school. 
+The file created below (fepel_abs) has that summarized data. 
+*/
 
 /*
 Here I create a single dataset called absentees with all of the 
@@ -469,16 +513,6 @@ data absentees;
     ;       
 run;
 
-
-
-*******************************************************************************;
-* Further Data Prepration for the Three Questions from Yale Paulsen;
-*******************************************************************************;
-/*
-For my third question I needed another file that summarizes the number of fep 
-and el students in each school. 
-The file created below (fepel_abs) has that summarized data. 
-*/
 
 
 /*
@@ -558,6 +592,16 @@ data fepel_abs;
         HLessCumulativeEnrollment^="*"
         and 
         HLessChronicAbsenteeismCount^="*"
+        and 
+        EL_Count^=0
+        and 
+        FEP_Count^=0
+        and 
+        HLessCumulativeEnrollment^="0"
+        and 
+        TotalChronicAbsenteeismCount^="0"
+        and
+        TotalCumulativeEnrollment^="0"
     ;
 run;
 
@@ -572,18 +616,45 @@ data fepel_abs;
 run; 
 
 /* Merge fepel_abs with absentees to create final analytic file. */
+
 data by_school_analytic; 
     merge 
         absentees 
         fepel_abs; 
     by 
         cdscode
-    ; 
+    ;
 run;
 
+/* Final data integrity step. */
+data by_school_analytic; 
+    set by_school_analytic; 
+    ;
+    where
+        not(missing(EL_Count))
+        and
+        not(missing(FEP_Count))
+        and 
+        not(missing(TotalCumulativeEnrollment))
+        and 
+        not(missing(TotalChronicAbsenteeismCount))
+        and
+        not(missing(HLessCumulativeEnrollment))
+        and 
+        not(missing(HLessChronicAbsenteeismCount))
+    ;
+run;
+
+/* Adding necessary log columns to analytic file. */
+data by_school_analytic;
+    set by_school_analytic;
+    logchronabs=log(ChronicAbsentee_Rate);
+    logEL=log(EL_Rate);
+    logFtoE=log(FEPtoELratio);
+    logHless=log(Homeless_Rate);
+run;
 
 /* Delete temporary files. */
-
 proc datasets library=work nolist;
     delete 
         Absentees

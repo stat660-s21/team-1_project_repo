@@ -35,74 +35,10 @@ column of the same name from fepsch19.
 Limitations: Values of "Language" and "School" equal to zero or empty should be 
 excluded from this analysis, since they are potentially missing data values.
 */
-proc sql;
-    create table fep_el_analytic_1 as
-	    select 
-            coalesce(E.cdscode, F.cdscode)
-			as CDSCode,
-            coalesce(E.lc, F.lc)
-			as LC
-            label "Language Identification Code",,
-			E.language as language_EL 
-            label "Language Name Spoken by the Most EL",
-			E.totalnum as total_EL 
-            label "Total Number of EL Speaking that Selected Language",
-			F.language as language_FEP 
-            label "Language spoken by the most FEP",
-			F.totalnum as total_FEP
-            label "Total Number of FEP Speaking that Selected Language",
-		from elsch_analytic as E
-		    full join
-            fepsch_analytic as F
-			on E.cdscode=F.cdscode
-        order by CDSCode
-	;
-quit;
 
+proc means data=Whole_School_analytic;
+        value chrabs_rate
 
-/* Build analytic dataset from raw datasets imported above including only the 
-columns and minimal data-cleaning/transforamtion needed to address the first
-queation/objective.*/
-proc sql;
-    create table fep_el_analytic_2 as
-	    select cdscode, lc, language, max(total_el) as totalnum_EL,
-               max(total) as totalnum_FEP
-		from fepel_analytic
-		group by cdscode
-		having total_el=totalnum_EL | total=totalnum_FEP
-        order by cdscode;
-quit;
-
-/* 
-Check fep_el_analytic2 for bad unique id values, where the column cdscode
-is intended to be a primary key.
-
-After executing this data step, the resulting dataset is emptywe, meaning
-that full joins used above didn't introduce duplicates in the 
-fep_el_analytic2. So we can do further proceeding.
-*/
-data fep_el_analytic_2_bad_ids;
-    set fep_el_analytic_2;
-	by cdscode;
-	if
-        first.cdscode * last.cddscode = 0
-        or
-        missing(cdscode)
-        or
-        substr(cdscode,8,7) in ("00000000", "0000001")
-	then
-	    do;
-		    output;
-		end;
-run;
-proc sort
-        nodupkey
-        data=fep_el_analytic_2
-        dupout=fep_el_analytic_2_dups
-    ;
-    by
-		cdscode
-    ;
 run;
 
 *******************************************************************************;
@@ -127,25 +63,69 @@ included in this analysis, since these rows contain SchoolName information.
 /* Build analytic dataset from raw datasets imported above including only 
 the columns and minimal data-cleaning/transforamtion needed to address this
 research queation/objective.*/
+proc format;
+    value chrabs
+	    0-<30='0-30'
+        30-<70='30-70'
+		70-100='70-100'
+	;
+run;
+
+title "Correlation Analysis for Chronic Absenteeism Rate and Languages of English Learners";
+proc freq data=Whole_School_analytic;
+    table chrabs_rate language_EL;
+	format chrabs_rate chrabs.;
+run;
+title;
+
 proc sql;
-    create table el_chrabsrate_analytic as
-	    select 
-            coalesce(E.cdscode, C.cdscode)
-			as CDSCode,
-			E.language as language_EL 
-            label"Language Spoken by the Most EL",
-			E.totalnum as total_EL 
-            label"Total Number of EL Speaking that Selected Language",
-			C.chrabsrate as chrabs_rate
-			label"Chronic Absenteeism Rate"
-		    from elsch_analytic as E
-		    full join
-            Chrabs_rate_analytic as C
-            on E.cdscode=C.cdscode
-        order by cdscode
+    create table EL_Chrabs_count_analytic as
+	    select chrabs_rate format chrabs., language_EL
+        from Whole_School_analytic
+        where 
+            chrabs_rate is not null 
+	        and
+            language_EL is not null
+		group by chrabs_rate, language_EL
+        order by chrabs_rate, language_EL;
+run;
+
+proc freq data=EL_Chrabs_count_analytic;
+    table language_EL;
+	
+run;
+
+
+proc sort data=Whole_School_analytic out=EL_Chrabs_analytic;
+    format chrabs_rate chrabs.;
+	where 
+        not(missing(chrabs_rate))
+	    and
+        not(missing(language_EL))
+	;
+	by chrabs_rate language_EL;
+run;
+
+data EL_Chrabs_count_analytic;
+    set EL_Chrabs_analytic;
+    count+1;
+	by chrabs_rate language_EL;
+	if first.language_EL then count=1;
+run;
+
+proc sql;
+    create table EL_Chrabs_max_analytic as
+	    select distinct language_EL, chrabs_rate, max(count) as count
+		from EL_Chrabs_count_analytic
+	group by chrabs_rate, language_EL
+	
+	order by chrabs_rate, count desc
 	;
 quit;
 
+proc print data=EL_Chrabs_count_analytic(obs=500);
+ format chrabs_rate chrabs.;
+run;
 
 *******************************************************************************;
 * Research Question 3 Analysis Starting Point;
@@ -196,4 +176,6 @@ proc sql;
         order by cdscode
 	;
 quit;
+proc print data=Chrabsrate_ELAS_analytic(obs=10);
+run;
 
