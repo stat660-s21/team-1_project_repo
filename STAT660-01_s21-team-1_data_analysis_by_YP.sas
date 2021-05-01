@@ -118,13 +118,6 @@ footnote1 justify=left
 "This should be the only file I need to carry out this analysis."
 ;
 
-/* Print data that will be used in this analysis. */ 
-options obs=10;
-proc print data=by_school_analytic noobs;
-    var cdscode EL_Rate ChronicAbsentee_Rate;
-run;
-options obs=max;
-
 /* Create scatterplot */
 proc sgplot data=q2;
     scatter x=EL_rate y=ChronicAbsentee_Rate;
@@ -132,24 +125,16 @@ run;
 
 /* 
 A scatterplot of the raw data shows drastic skew on both axes. 
-I will take the log of both. 
+It will be more informative to look at the log of both. 
 */
-data q2;
-    set by_school_analytic;
-    logchronabs=log(ChronicAbsentee_Rate);
-    logEL=log(EL_Rate);
-proc sgplot data=q2;
+proc sgplot data=by_school_analytic;
     scatter x=logEL y=logChronAbs;
 run;
 
 /* OLS regression on log-transformed data. */
-proc reg data=q2;
+proc reg data=by_school_analytic;
     model logChronAbs = logEL;
 run;
-
-
-
-
 
 title;
 footnote;
@@ -203,16 +188,12 @@ run;
 As above, a plot of the raw data shows a drastic skew on both axes. 
 I will again take the log of both. 
 */
-data q3;
-    set by_school_analytic;
-    logchronabs=log(ChronicAbsentee_Rate);
-    logFtoE=log(FEPtoELratio);
-proc sgplot data=q3;
+proc sgplot data=by_school_analytic;
     scatter x=logFtoE y=logChronAbs;
 run;
 
 /* Linear regression */
-proc reg data=q3; 
+proc reg data=by_school_analytic; 
     model logChronAbs=logFtoE; 
 run; 
 
@@ -225,27 +206,4 @@ footnote;
 
 
 /* How do EL_ and HLess interact to affect chronabs? */ 
-data q4;
-    set by_school_analytic;
-    logchronabs=log(ChronicAbsentee_Rate);
-    logEL=log(EL_Rate);
-    logFtoE=log(FEPtoELratio);
-    logHless=log(Homeless_Rate);
-proc sgplot data=q4;
-    scatter x=logchronabs y=Homeless_Rate;
-proc sgplot data=q4;
-    scatter x=logchronabs y=logHless;
-run;
-
-
-
-proc reg data=q3; 
-    model logChronAbs=logFtoE; 
-run; 
-
-proc sgplot data=by_school_analytic;
-    histogram ChronicAbsentee_Rate; 
-run;
-
-
 
