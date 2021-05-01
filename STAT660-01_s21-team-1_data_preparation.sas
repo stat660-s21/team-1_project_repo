@@ -452,8 +452,6 @@ proc sql;
         order by CDSCode
 	;
 quit;
-proc print data=Whole_School_analytic(obs=10);
-run;
 	    
 
 
