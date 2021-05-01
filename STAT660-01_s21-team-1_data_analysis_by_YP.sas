@@ -22,11 +22,16 @@ answer the research questions below
 /*
 Question 1 of 3: How do rates of homeless students and rates of ESL learners 
 interact in California at the School level? 
-Rationale: This should help us understand which regions in the state are in 
+Rationale: While we may not exect a great amount of overlap between the two 
+groups, we do expect schools to vary in the number of these at risk populations
+and we should expect some schools to have a greater number of both populations
+of students in need of aid. If correlation between these groups is strong then 
+schools in need of one type of assistance should be considered for the other as 
+well. 
+This should help us understand if certain schools within the state are in 
 greater need of resources earmarked for various social programs.
-Notes: 
-This compares the columns EL_Rate and Homeless_Rate in the by_school_analytic
-file. 
+Notes: This compares the columns EL_Rate and Homeless_Rate in the 
+by_school_analytic file. 
 Limitations: Edited (4/29): This question can now be addressed using only the 
 by_school_analytic file. 
 */
@@ -36,7 +41,8 @@ title1 justify=left
 ;
 
 title2 justify=left
-'Rationale: This should help us understand which regions in the state are in greater need of resources earmarked for various social programs.'
+'Rationale: While we may not exect a great amount of overlap between the two groups, we do expect schools to vary in their number of these at risk populations and we should expect some schools to have a greater number of both populations of students in need of aid. If correlation between these groups is strong then schools in need of one type of assistance should be considered for the other as 
+well.'
 ;
 
 title3 justify=left
@@ -52,6 +58,31 @@ proc print data=by_school_analytic noobs;
     var cdscode EL_Rate Homeless_Rate;
 run;
 options obs=max;
+
+
+
+
+/* I want to change this question to ask how homelessness affects chronic absenteeism */
+
+/* Insert scatterplot */
+/* Insert proc corr */ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 title;
 footnote;
@@ -72,7 +103,7 @@ by_school_analytic file.
 */
 
 title1 justify=left
-'Question 2 of 3: How does the rate of ESL learners in a County affect chronic absenteeism rates in California schools?'
+'Question 2 of 3: How does the rate of English learners affect the rate of chronic absenteeism in California schools?'
 ;
 
 title2 justify=left
@@ -87,11 +118,38 @@ footnote1 justify=left
 "This should be the only file I need to carry out this analysis."
 ;
 
+/* Print data that will be used in this analysis. */ 
 options obs=10;
 proc print data=by_school_analytic noobs;
     var cdscode EL_Rate ChronicAbsentee_Rate;
 run;
 options obs=max;
+
+/* Create scatterplot */
+proc sgplot data=q2;
+    scatter x=EL_rate y=ChronicAbsentee_Rate;
+run;
+
+/* 
+A scatterplot of the raw data shows drastic skew on both axes. 
+I will take the log of both. 
+*/
+data q2;
+    set by_school_analytic;
+    logchronabs=log(ChronicAbsentee_Rate);
+    logEL=log(EL_Rate);
+proc sgplot data=q2;
+    scatter x=logEL y=logChronAbs;
+run;
+
+/* OLS regression on log-transformed data. */
+proc reg data=q2;
+    model logChronAbs = logEL;
+run;
+
+
+
+
 
 title;
 footnote;
@@ -136,8 +194,58 @@ proc print data=by_school_analytic noobs;
 run;
 options obs=max;
 
+/* Create scatterplot */
+proc sgplot data=by_school_analytic; 
+    scatter x=FEPtoELratio y=ChronicAbsentee_Rate; 
+run;
+
+/* 
+As above, a plot of the raw data shows a drastic skew on both axes. 
+I will again take the log of both. 
+*/
+data q3;
+    set by_school_analytic;
+    logchronabs=log(ChronicAbsentee_Rate);
+    logFtoE=log(FEPtoELratio);
+proc sgplot data=q3;
+    scatter x=logFtoE y=logChronAbs;
+run;
+
+/* Linear regression */
+proc reg data=q3; 
+    model logChronAbs=logFtoE; 
+run; 
+
 title;
 footnote;
 
-proc contents data=by_school_analytic; 
+
+
+
+
+
+/* How do EL_ and HLess interact to affect chronabs? */ 
+data q4;
+    set by_school_analytic;
+    logchronabs=log(ChronicAbsentee_Rate);
+    logEL=log(EL_Rate);
+    logFtoE=log(FEPtoELratio);
+    logHless=log(Homeless_Rate);
+proc sgplot data=q4;
+    scatter x=logchronabs y=Homeless_Rate;
+proc sgplot data=q4;
+    scatter x=logchronabs y=logHless;
+run;
+
+
+
+proc reg data=q3; 
+    model logChronAbs=logFtoE; 
 run; 
+
+proc sgplot data=by_school_analytic;
+    histogram ChronicAbsentee_Rate; 
+run;
+
+
+
