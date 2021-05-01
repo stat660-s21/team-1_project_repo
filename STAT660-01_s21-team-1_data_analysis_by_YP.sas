@@ -20,69 +20,72 @@ answer the research questions below
 * Research Question 1 Analysis Startinqg Point;
 *******************************************************************************;
 /*
-Question 1 of 3: How do rates of homeless students and rates of ESL learners 
-interact in California at the School level? 
-Rationale: While we may not exect a great amount of overlap between the two 
-groups, we do expect schools to vary in the number of these at risk populations
-and we should expect some schools to have a greater number of both populations
-of students in need of aid. If correlation between these groups is strong then 
-schools in need of one type of assistance should be considered for the other as 
-well. 
-This should help us understand if certain schools within the state are in 
-greater need of resources earmarked for various social programs.
-Notes: This compares the columns EL_Rate and Homeless_Rate in the 
+Question 1 of 3: How do rates of homeless students affect rates of chronic 
+absenteeism in California schools? 
+
+Rationale: One of the most pressing issues facing California and espescially 
+facing Clifornia schools is a lack of affordable housing. Homeless students are
+expected to miss more school days because of environmental circumstances than 
+a typical student. This should analysis should help us understand how schools 
+that face these problems can better serve their students.
+
+Note: This compares the columns ChronicAbsentee_Rate and Homeless_Rate in the 
 by_school_analytic file. 
+
 Limitations: Edited (4/29): This question can now be addressed using only the 
 by_school_analytic file. 
 */
 
 title1 justify=left
-'Question 1 of 3: How do rates of homeless students and rates of ESL learners interact in California schools?'
+'Question 1 of 3: How do rates of homeless students affect rates of chronic absenteeism in California schools?'
 ;
 
 title2 justify=left
-'Rationale: While we may not exect a great amount of overlap between the two groups, we do expect schools to vary in their number of these at risk populations and we should expect some schools to have a greater number of both populations of students in need of aid. If correlation between these groups is strong then schools in need of one type of assistance should be considered for the other as 
-well.'
+'Rationale: One of the most pressing issues facing California, and one that especially affects California schools, is a lack of affordable housing. Homeless students are expected to miss more school days because of environmental circumstances than a typical student. This analysis should help us understand how schools that face these problems can better serve their students.'
 ;
 
 title3 justify=left
-"This table shows rates of chronic absenteeism among homeless students, English learners, and for the total population in 4886 California schools."
+"Chronic Absenteeism by homelessness in 4719 California Schools."
 ;
 
 footnote1 justify=left
-"This should be the only file I need to carry out this analysis."
+"This plot show an obvious skew along both axes."
 ;
 
-options obs=10;
-proc print data=by_school_analytic noobs;
-    var cdscode EL_Rate Homeless_Rate;
+proc sgplot data=by_school_analytic; 
+    scatter x=homeless_rate y=chronicabsentee_rate;
 run;
-options obs=max;
 
+title;
+footnote;
 
+title3 justify=left
+"log(Chronic Absenteeism) by log(Homelessness) in 4719 California Schools."
+;
 
+footnote1 justify=left
+"Here we can see that there isn't a strong visual relationship."
+;
 
-/* I want to change this question to ask how homelessness affects chronic absenteeism */
+proc sgplot data=by_school_analytic; 
+    scatter x=logHless y=logChronAbs;
+run;
 
-/* Insert scatterplot */
-/* Insert proc corr */ 
+title;
+footnote;
 
+title3 justify=left
+"OLS regression of log(Chronic Absentee Rate)=log(Homelessness Rate)."
+;
 
+footnote1 justify=left
+"The OLS regression shows a significant relationship between the two log values."
+;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+proc reg data=by_school_analytic;
+    model logchronabs=loghless;
+    ods select ParameterEstimates FitPlot;
+run;
 
 title;
 footnote;
@@ -91,13 +94,19 @@ footnote;
 * Research Question 2 Analysis Starting Point;
 *******************************************************************************;
 /*
-Question 2 of 3: How does the rate of ESL learners affect chronic absenteeism 
-rates in California schools?
-Rationale: This information will further help to identify regions in greater 
-need of funding from the state.  
+Question 2 of 3: How does the rate of English Learners affect chronic 
+absenteeism rates in California schools?
+
+Rationale: Much like homelessness among their students, Califonria schools face 
+the challenge of helping students who struggle to understand the language being 
+used by their instructors. Many students miss school because they find it hard 
+to effectively communicate with their teachers and classmates. This analysis 
+will further help to identify schools in greater need of funding from the state.  
+
 Notes: 
 This compares the columns EL_Rate and ChronicAbsentee_Rate in the 
 by_school_analytic file. 
+
 Limitations: Edited (4/29): This question can now be addressed using only the 
 by_school_analytic file. 
 */
@@ -107,33 +116,50 @@ title1 justify=left
 ;
 
 title2 justify=left
-'Rationale: This should help us understand which regions in the state are in greater need of resources earmarked for various social programs.'
+'Rationale: Much like homelessness among their students, Califonria schools face the challenge of helping students who struggle to understand the language being used by their instructors. Many students miss school because they find it hard to effectively communicate with their teachers and classmates. This analysis will further help to identify schools in greater need of funding from the state.'
 ;
 
 title3 justify=left
-"This table shows rates of chronic absenteeism among English learners and for the total population in 4886 California schools."
+"Chronic Absenteeism by EL Rates in 4719 California Schools."
 ;
 
 footnote1 justify=left
-"This should be the only file I need to carry out this analysis."
+"Like the first question, this plot show an obvious skew along both axes."
 ;
 
-/* Create scatterplot */
-proc sgplot data=q2;
-    scatter x=EL_rate y=ChronicAbsentee_Rate;
+proc sgplot data=by_school_analytic; 
+    scatter x=homeless_rate y=chronicabsentee_rate;
 run;
 
-/* 
-A scatterplot of the raw data shows drastic skew on both axes. 
-It will be more informative to look at the log of both. 
-*/
-proc sgplot data=by_school_analytic;
+title;
+footnote;
+
+title3 justify=left
+"log(Chronic Absenteeism) by log(EL Rate) in 4719 California Schools."
+;
+
+footnote1 justify=left
+"Here we can see that, like above, there isn't a strong visual relationship."
+;
+
+proc sgplot data=by_school_analytic; 
     scatter x=logEL y=logChronAbs;
 run;
 
-/* OLS regression on log-transformed data. */
+title;
+footnote;
+
+title3 justify=left
+"OLS regression of log(Chronic Absentee Rate)=log(EL Rate)."
+;
+
+footnote1 justify=left
+"The OLS regression shows a significant relationship between the two log values."
+;
+
 proc reg data=by_school_analytic;
-    model logChronAbs = logEL;
+    model logchronabs=logEL;
+    ods select ParameterEstimates FitPlot;
 run;
 
 title;
@@ -143,67 +169,43 @@ footnote;
 * Research Question 3 Analysis Starting Point;
 *******************************************************************************;
 /*
-Question 3 of 3: How does the relative proportion of FEP students to EL 
-students affect the rate of chronic absenteesim in California schools? 
-Rationale: This question would attempt to assess the relative rates of 
-abenteeism between English Learners, and those who have successfully learned 
-English. This knowledge would help us understand whether successful ESL programs
-are effective in lowering absenteeism.    
-Note: 
-This compares the columns FEPtoELratio and ChronicAbsentee_Rate in the 
-by_school_analytic file. 
+Question 3 of 3: How do homelessness and EL rates interact to affect chronic 
+absenteeism in California schools? 
+
+Rationale: While we may not expect a great amount of overlap between the two 
+groups, we do expect schools to vary in the number of these at-risk populations
+that they serve, and we should expect some schools to have a greater number of 
+both populations of students in need of aid. This analysis should help us 
+understand if certain schools within the state are in greater need of resources 
+earmarked for various social programs based on the combination of factors.
+
+Note: This compares the ChronicAbsentee_Rate column to the EL_Rate and 
+Homless_Rate in the by_school_analytic file. 
+
 Limitations: Edited (4/29): This question can now be addressed using only the 
 by_school_analytic file.  
 */
 
-/*Print table*/
 title1 justify=left
-'Question 3 of 3: How does the relative proportion of FEP students to EL students affect the rate of chronic absenteesim in California schools?'
+'Question 3 of 3: How do homelessness and EL rates interact to affect chronic absenteeism in California schools?'
 ;
 
 title2 justify=left
-'Rationale: This question would attempt to assess the relative rates of abenteeism between English Learners, and those who have successfully learned English. This information would help us understand whether successful ESL programs are effective in lowering chronic absenteeism.'
+'Rationale: While we may not expect a great amount of overlap between the two groups, we do expect schools to vary in the number of these at-risk populations that they serve, and we should expect some schools to have a greater number of both populations of students in need of aid. This analysis should help us understand if certain schools within the state are in greater need of resources earmarked for various social programs based on the combination of factors.'
 ;
 
 title3 justify=left
-"This table contains count and rate information for EL and FEP students as well as chronic absenteeism rates for 4886 California schools."
+"OLS regression of log(Chronic Absentee Rate)=log(EL Rate) + log(Homelessness)."
 ;
 
 footnote1 justify=left
-"This should be the only file I need to carry out this analysis."
+"When both terms are considered along with their interaction, the OLS regression shows a significant relationship between the logs of both the two predictor values and the log of chronic absenteeism. It also shows that their interaction is an important factor that should be considered when assessing a school's need."
 ;
 
-options obs=10;
-proc print data=by_school_analytic noobs;
-    var cdscode FEPtoELratio ChronicAbsentee_Rate;
+proc glm data=by_school_analytic;
+    model logchronabs=logEL logHless logEL*logHless;
+    ods select ParameterEstimates ContourFit;
 run;
-options obs=max;
-
-/* Create scatterplot */
-proc sgplot data=by_school_analytic; 
-    scatter x=FEPtoELratio y=ChronicAbsentee_Rate; 
-run;
-
-/* 
-As above, a plot of the raw data shows a drastic skew on both axes. 
-I will again take the log of both. 
-*/
-proc sgplot data=by_school_analytic;
-    scatter x=logFtoE y=logChronAbs;
-run;
-
-/* Linear regression */
-proc reg data=by_school_analytic; 
-    model logChronAbs=logFtoE; 
-run; 
 
 title;
 footnote;
-
-
-
-
-
-
-/* How do EL_ and HLess interact to affect chronabs? */ 
-
