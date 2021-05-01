@@ -592,6 +592,16 @@ data fepel_abs;
         HLessCumulativeEnrollment^="*"
         and 
         HLessChronicAbsenteeismCount^="*"
+        and 
+        EL_Count^=0
+        and 
+        FEP_Count^=0
+        and 
+        HLessCumulativeEnrollment^="0"
+        and 
+        TotalChronicAbsenteeismCount^="0"
+        and
+        TotalCumulativeEnrollment^="0"
     ;
 run;
 
@@ -606,15 +616,43 @@ data fepel_abs;
 run; 
 
 /* Merge fepel_abs with absentees to create final analytic file. */
+
 data by_school_analytic; 
     merge 
         absentees 
         fepel_abs; 
     by 
         cdscode
-    ; 
+    ;
 run;
 
+/* Final data integrity step. */
+data by_school_analytic; 
+    set by_school_analytic; 
+    ;
+    where
+        not(missing(EL_Count))
+        and
+        not(missing(FEP_Count))
+        and 
+        not(missing(TotalCumulativeEnrollment))
+        and 
+        not(missing(TotalChronicAbsenteeismCount))
+        and
+        not(missing(HLessCumulativeEnrollment))
+        and 
+        not(missing(HLessChronicAbsenteeismCount))
+    ;
+run;
+
+/* Adding necessary log columns to analytic file. */
+data by_school_analytic;
+    set by_school_analytic;
+    logchronabs=log(ChronicAbsentee_Rate);
+    logEL=log(EL_Rate);
+    logFtoE=log(FEPtoELratio);
+    logHless=log(Homeless_Rate);
+run;
 
 /* Delete temporary files. */
 proc datasets library=work nolist;
