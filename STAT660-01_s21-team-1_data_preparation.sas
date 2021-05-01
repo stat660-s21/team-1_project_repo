@@ -411,10 +411,13 @@ proc sql;
         order by cdscode
         ;
 quit;
-data ELAS_LTEL_AR_analytic;
+data ELAS_LTEL_AR_analytic(rename=(maxvar=type) drop=EO IFEP EL RFEP TBD);
     set ELAS_analytic;
-        abs=max(EO, IFEP, EL, RFEP, TBD);
-        rename=(abs)
+        array v EO IFEP EL RFEP TBD;
+		maxvalue = max(of v(*));
+        length maxvar $4.;
+		maxvar = vname(v[whichn(maxvalue, of v(*))]);    
+run;
 
 /* 
 For Chronic_abs, the column CDSCODE is a primary key, but we cannot
@@ -442,7 +445,48 @@ proc sql;
         order by cdscode;
 quit;
 
+/* Merge all analytic files to create one final analytic file. */
+proc sql;
+    create table Whole_School_analytic as
+        select 
+            coalesce(E.cdscode, F.cdscode, C.cdscode, EL.cdscode)
+			as CDSCode,
+			E.language as language_EL 
+            label "Language Name Spoken by the Most EL",
+			E.totalnum as total_EL 
+            label "Total Number of EL Speaking that Selected Language",
+			F.language as language_FEP 
+            label "Language spoken by the most FEP",
+			F.totalnum as total_FEP
+            label "Total Number of FEP Speaking that Selected Language",
+			C.chrabsrate as chrabs_rate
+			label "Chronic Absenteeism Rate",
+			EL.type as student_type
+            label "The Most Common Type of Students"
+		from elsch_analytic as E
+		    full join
+            fepsch_analytic as F
+			on E.cdscode=F.cdscode
+			full join
+            Chrabs_rate_analytic as C
+            on E.cdscode=C.cdscode
+			full join
+			ELAS_LTEL_AR_analytic as EL
+            on E.cdscode=EL.cdscode
+        order by CDSCode
+	;
+quit;
+	    
 
+
+*******************************************************************************;
+* Further Data Prepration for the Three Questions from Yale Paulsen;
+*******************************************************************************;
+/*
+For my third question I needed another file that summarizes the number of fep 
+and el students in each school. 
+The file created below (fepel_abs) has that summarized data. 
+*/
 
 /*
 Here I create a single dataset called absentees with all of the 
@@ -492,8 +536,6 @@ data absentees;
         CountyName
     ;       
 run;
-
-
 
 *******************************************************************************;
 * Further Data Prepration for the Three Questions from Yale Paulsen;
