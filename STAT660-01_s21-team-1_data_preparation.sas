@@ -447,7 +447,7 @@ quit;
 
 /* Merge all analytic files to create one final analytic file. */
 proc sql;
-    create table Whole_School_analytic as
+    create table Whole_School_analytic_raw as
         select 
             coalesce(E.cdscode, F.cdscode, C.cdscode, EL.cdscode)
 			as CDSCode,
@@ -477,7 +477,43 @@ proc sql;
 	;
 quit;
 	    
+/* check Whole_School_analytic_raw for rows whose unique id values are repeated,
+missing, or correspond to non-schools, where the column CDS_Code is intended to
+be a primary key; after executing this data step, we see that the full joins
+used above introduced duplicates in Whole_School_analytic, which need to be
+mitigated before proceeding */
+data Whole_School_analytic_bad_ids;
+    set Whole_School_analytic_raw;
+    by CDSCode;
+    if
+        first.CDSCode*last.CDSCode = 0
+        or
+        missing(CDSCode)
+        or
+        substr(CDSCode,8,7) in ("0000000","0000001")
+    then
+        do;
+            output;
+        end;
+run;
 
+/* remove duplicates from Whole_School_analytic_raw with respect to CDSCode;
+after inspecting the rows in Whole_School_analytic_raw, we saw that either
+of the rows in duplicate-row pairs can be removed without losing values for
+analysis, so we use proc sort to indiscriminately remove duplicates, after
+which column CDS_Code is guaranteed to form a primary key */
+proc sort
+    nodupkey
+    data=Whole_School_analytic_raw
+    out=Whole_School_analytic
+;
+    by CDSCode;
+    where 
+	    not(missing(CDSCode))
+        or
+        substr(CDSCode,8,7) not in ("0000000","0000001")
+;
+run;
 
 *******************************************************************************;
 * Further Data Prepration for the Three Questions from Yale Paulsen;
