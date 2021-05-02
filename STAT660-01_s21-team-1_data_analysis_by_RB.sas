@@ -20,162 +20,248 @@ answer the research questions below
 *******************************************************************************;
 * Research Question 1 Analysis Starting Point;
 *******************************************************************************;
-/*
-Question 1 of 3: What are the main language spoken by English learners (EL) and 
+title1 justify=left
+"Question 1 of 3: What are the main language spoken by English learners (EL) and 
 Fluent-English-Proficient (FEP) students in different schools? Can we find 
-anything interesting among them? 
+anything interesting among them?"
+;
 
-Rationale: To take a look at the percentage of different languages, which would 
+title2 justify=left
+"Rationale: To take a look at the percentage of different languages, which would 
 help school gain culture diversity. And to see if some type of native languages 
-will have positive influence on the students’ English proficiency.
+will have positive influence on the students English proficiency."
+;
 
-Note: This compares the column “Language”, “School” from elsch19 to the 
-column of the same name from fepsch19.
+footnote1 justify=left
+"Spanish is the most common language among both English learners (EL) and 
+Fluent-English-Proficient (FEP) students"
+;
 
-Limitations: Values of "Language" and "School" equal to zero or empty should be 
-excluded from this analysis, since they are potentially missing data values.
-*/
+footnote2 justify=left
+"The most common languages such as Spanish, Mandarin and Vietnamese have higher 
+percentage of speakers among Fluent-English-Proficient (FEP) students than the
+percentage among English learners (EL). On the contrast, the minor languages 
+such as Dutch, Lao and Samoan tend to have higher percentage of speakers among
+English learners (EL)"
+;
 
-proc means data=Whole_School_analytic;
-        value chrabs_rate
+title;
+footnote;
 
+proc sql;
+    create table EL_FEP_analytic as
+	    select coalesce(E.language, F.language) as language, E.total_EL, F.total_FEP
+        from 
+            (select language_EL as language, sum(total_EL) as total_EL
+			    from Whole_School_analytic
+				where
+				    language is not null
+					and
+					total_EL is not null
+                group by language
+            ) as E
+		    inner join
+            (select language_FEP as language, sum(total_FEP) as total_FEP
+			    from Whole_School_analytic
+				where
+				    language is not null
+					and
+					total_FEP is not null
+                group by language
+            ) as F
+			on E.language=F.language
+        
+    order by language; 
+quit;
+
+title;
+footnote;
+
+title1 justify=left
+"Summary Statistics for Language of FEP students and Languages of EL"
+;
+
+footnote1 justify=left
+"The number of Spanish speakers among both English learners (EL) and 
+Fluent-English-Proficient (FEP) students is nearly 1000000."
+;
+
+proc means data=EL_FEP_analytic maxdec=0;
+    var total_EL total_FEP;
 run;
+
+title;
+footnote;
+
+title1 justify=left
+"Scatter Plot of the Number of Languages of FEP students and EL"
+;
+
+footnote1 justify=left
+"The scatter plot has excluded Spanish because the number of Spanish is much
+larger than other values and badly influences the visualization of all points."
+;
+
+proc sgplot data=EL_FEP_analytic(where=(total_EL<100000));
+    scatter 
+        x=total_EL
+        y=total_FEP/
+		group=language
+		datalabel=language
+    ;
+	lineparm x=0 y=0 slope=2/ lineattrs=(color='red')
+    ;
+run;
+
+title;
+footnote;
+
+
 
 *******************************************************************************;
 * Research Question 2 Analysis Starting Point;
 *******************************************************************************;
-/*
-Question 2 of 3: If English learners with different language will have various
-Chronic Absenteeism Rate? 
+title1 justify=left
+"Question 2 of 3: Will English learners with different language have various
+Chronic Absenteeism Rate?"
+;
 
-Rationale: This would help inform whether native languages are associated with 
-Chronic Absenteeism Rate.
+title2 justify=left
+"Rationale: This would help inform whether native languages are associated with 
+Chronic Absenteeism Rate."
+;
 
-Note: This compares the column "Language" from elsch19 to the column “Chronic 
-Absenteeism Rate” from chronicabsenteeism19.
+footnote1 justify=left
+"The number of Spanish speakers is much more than other types of language, so it
+is hard to find some associations between languages and Chronic Absenteeism Rate."
+;
 
-Limitations: Values of "Language" and "Chronic Absenteeism Rate" equal to zero 
-or empty should be excluded from this analysis, since they are potentially 
-missing data values. And only values of "AggregateLevel" eaqul to "S" should be 
-included in this analysis, since these rows contain SchoolName information.
-*/
+footnote2 justify=left
+"Overall, Spanish speakers tend to have lower Chronic Absenteeism Rate."
+;
 
-/* Build analytic dataset from raw datasets imported above including only 
-the columns and minimal data-cleaning/transforamtion needed to address this
-research queation/objective.*/
 proc format;
     value chrabs
-	    0-<30='0-30'
-        30-<70='30-70'
-		70-100='70-100'
+	    0-<30='0-30%'
+        30-<70='30%-70%'
+		70-100='70%-100%'
 	;
 run;
 
-title "Correlation Analysis for Chronic Absenteeism Rate and Languages of English Learners";
-proc freq data=Whole_School_analytic;
-    table chrabs_rate language_EL;
-	format chrabs_rate chrabs.;
-run;
 title;
+footnote;
 
-proc sql;
-    create table EL_Chrabs_count_analytic as
-	    select chrabs_rate format chrabs., language_EL
-        from Whole_School_analytic
-        where 
-            chrabs_rate is not null 
-	        and
-            language_EL is not null
-		group by chrabs_rate, language_EL
-        order by chrabs_rate, language_EL;
-run;
+title1 justify=left
+"Correlation Analysis for Chronic Absenteeism Rate and Languages of English 
+Learners"
+;
 
-proc freq data=EL_Chrabs_count_analytic;
-    table language_EL;
-	
-run;
+footnote1 justify=left
+"Chronic Absenteeism Rates of speakers of other typre of language (not Spanish)
+are mostly within a low percentage of range of 0-30%."
+;
 
-
-proc sort data=Whole_School_analytic out=EL_Chrabs_analytic;
-    format chrabs_rate chrabs.;
+ods graphics on;
+proc freq data=Whole_School_analytic order=freq;
+    table chrabs_rate language_EL chrabs_rate*language_EL/crosslist plots=freqplot out=EL_Chrabs_count;
+	format chrabs_rate chrabs.;
+	label chrabs_rate="Chronic Absenteeism Rate";
 	where 
-        not(missing(chrabs_rate))
-	    and
+	    not(missing(chrabs_rate))
+		and
         not(missing(language_EL))
-	;
-	by chrabs_rate language_EL;
+;
 run;
 
 data EL_Chrabs_count_analytic;
-    set EL_Chrabs_analytic;
-    count+1;
-	by chrabs_rate language_EL;
-	if first.language_EL then count=1;
+   set EL_Chrabs_count;
+      where count>50;
 run;
 
-proc sql;
-    create table EL_Chrabs_max_analytic as
-	    select distinct language_EL, chrabs_rate, max(count) as count
-		from EL_Chrabs_count_analytic
-	group by chrabs_rate, language_EL
-	
-	order by chrabs_rate, count desc
-	;
-quit;
+title1 justify=left
+"Counts of Language by Chronic Absenteeism Rate"
+;
 
-proc print data=EL_Chrabs_count_analytic(obs=500);
- format chrabs_rate chrabs.;
+footnote1 justify=left
+"The number of Spanish speakers is much more than other types of language, and 
+Spanish speakers tend to have lower Chronic Absenteeism Rate."
+;
+
+proc sgplot data=EL_Chrabs_count_analytic;
+    vbar chrabs_rate/response=count
+         group=language_EL groupdisplay=cluster;
 run;
+
+title;
+footnote;
+
+
 
 *******************************************************************************;
 * Research Question 3 Analysis Starting Point;
 *******************************************************************************;
-/*
-Question 3 of 3: Is there a relationship between the type of students (classified 
-by their English level) with the Chronic Absenteeism Rate?
+title1 justify=left
+"Question 3 of 3: Is there a relationship between the type of students 
+(classified by their English level) with the Chronic Absenteeism Rate?"
+;
 
-Rationale: This would help identify if students’ English level will determine 
-their Chronic Absenteeism Rate.
+title2 justify=left
+"Rationale: This would help identify if students' English level will determine 
+their Chronic Absenteeism Rate."
+;
 
-Note: This compares the column “EO”, “IFEP”, “EL”, “RFEP”, “TBD” 
-from ELAS/LTEL/AT-Risk Data to the column “Chronic Absenteeism Rate” from 
-chronicabsenteeism19.
+title3 justify=left 
+"Correlation Analysis for Chronic Absenteeism Rate and Student Type"
+;
 
-Limitations: Values of “EO”, “IFEP”, “EL”, “RFEP”, “TBD” and 
-"Chronic Absenteeism Rate" equal to zero or empty should be excluded from this 
-analysis, since they are potentially missing data values. And only values of 
-"AggLEvel" and "AggregateLevel" eaqul to "S" should be included in this analysis, 
-since these rows contain SchoolName information.
-*/
+footnote1 justify=left
+"The percentages of different type of students among each range of Chronic 
+Absenteeism Rate are similar but show slight differences."
+;
 
-/* Build analytic dataset from raw datasets imported above including only 
-the columns and minimal data-cleaning/transforamtion needed to address this
-research queation/objective.*/
-proc sql;
-    create table Chrabsrate_ELAS_analytic as
-	    select 
-            coalesce(S.cdscode, C.cdscode)
-			as CDSCode,
-            S.EO as EO_num
-            label"Total Number of EO",
-            S.IFEP as IFEP_num
-            label"Total Number of IFEP", 
-            S.EL as EL_num 
-			label"Total Number of EL",
-            S.RFEP as RFEP_num
-			label"Total Number of RFEP",
-            S.TBD as TBD_num
-			label"Total Number of TBD",
-			C.chrabsrate as chrabs_rate
-			label"Chronic Absenteeism Rate"
-		from 
-            ELAS_analytic as S
-			full join
-            Chrabs_rate_analytic as C
-            on S.cdscode=C.cdscode
-        order by cdscode
-	;
-quit;
-proc print data=Chrabsrate_ELAS_analytic(obs=10);
+footnote2 justify=left
+"The number of EO is much more than other types of students, so that may have
+influence on our results of Chronic Absenteeism Rate."
+;
+
+footnote3 justify=left
+"The EL has the highest percentage of lower Chronic Absenteeism Rate within 
+range 0-30% compared to other type of student, and RFEP has the lowest 
+percentage of low Chronic Absenteeism Rate and the highest percentage of high 
+Chronic Absenteeism Rate."
+;
+
+proc freq data=Whole_School_analytic order=freq;
+    table student_type student_type*chrabs_rate/
+          crosslist out=Chrabs_Stutype_count;
+	format chrabs_rate chrabs.;
+	label chrabs_rate="Chronic Absenteeism Rate"
+          student_type="Type of Students";
+	where 
+	    not(missing(chrabs_rate))
+		and
+        not(missing(student_type))
+;
 run;
+
+title;
+footnote;
+
+title1 justify=left 
+"Counts of Different Chronic Absenteeism Rate by Student Type"
+;
+
+footnote1 justify=left
+"Among all types of students, EL tend to have the highest percentage of low 
+Chronic Absenteeism Rate and the lowest percentage of high Chronic Absenteeism
+Rate."
+;
+
+proc sgplot data=Chrabs_Stutype_count;
+    vbar chrabs_rate/response=count
+         group=student_type groupdisplay=cluster filltype=gradient datalabel;
+run;
+
+title;
+footnote;
 
