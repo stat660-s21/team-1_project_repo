@@ -240,7 +240,7 @@ footnote4 justify=left
 "From these anayses it has become clear that a student's homelessness status and their ability to effecitively communicate with those around them both have an impact on the rate of chronic absenteeism a school can expect to experience. I've further found that while considering EL rates has little effect on the estimated effect of homelessness, the estimated effect of EL rates increases drastically when the two are considered rtogether."
 ;
 
-footnote4 justify=left
+footnote5 justify=left
 "(Note: This model assumes that the relationship is generally linear, and that the errors are normally disrtibuted and vary constantly. The usual means by which to check these assumptions is to look at various diagnostic plots. While I have not included those plots here, I have assessed the validity of these assumptions and there appears to be no significant violation.)"
 ;
 
