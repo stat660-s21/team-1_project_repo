@@ -44,11 +44,11 @@ title4 justify=left
 ;
 
 footnote1 justify=left
-"Here we can see a visual trend."
+"Here we can see a trend."
 ;
 
 footnote2 justify=left
-"I will proceed next to examine this relationship analytically."
+"I will proceed to examine this relationship analytically."
 ;
 
 proc sgplot data=by_school_analytic; 
@@ -95,7 +95,7 @@ footnote3 justify=left
 ;
 
 footnote4 justify=left
-"(Note: This model assumes that the relationship is generally linear, and that the errors are normally disrtibuted and vary constantly. The usual means by which to check these assumptions is to look at various diagnostic plots. While I have not included those plots here, I have assessed the validity of these assumptions and there appears to be no significant violation.)"
+"(Note: This model assumes that the relationship is generally linear, and that the errors are normally distributed and vary constantly. The usual means by which to check these assumptions is to look at various diagnostic plots. While I have not included those plots here, I have used them to assess the validity of these assumptions and there appears to be no significant violation.)"
 ;
 
 proc glm data=by_school_analytic;
@@ -123,7 +123,7 @@ title1 justify=left
 ;
 
 title2 justify=left
-'Rationale: Much like homelessness among their students, Califonria schools face the challenge of helping students who struggle to understand the language being used by their instructors. Many students miss school because they find it hard to effectively communicate with their teachers and classmates. This analysis will further help to identify schools in greater need of funding from the state.'
+'Rationale: Much like homelessness among their students, California schools face the challenge of helping students who struggle to understand the language used by their instructors. Many students miss school because they find it difficult to effectively communicate with their teachers and classmates. This analysis will further help to identify schools in greater need of funding from the state.'
 ;
 
 title3 justify=left
@@ -139,7 +139,7 @@ footnote1 justify=left
 ;
 
 footnote2 justify=left
-"I will proceed to examine this relationship analytically."
+"Next I will examine this relationship analytically."
 ;
 
 proc sgplot data=by_school_analytic; 
@@ -178,7 +178,7 @@ footnote1 justify=left
 ;
 
 footnote2 justify=left
-"Based on the p-value above (logEL: p < 0.0001) there is strong evidence that homelessness affects chronic abesnteeism in public schools."
+"Based on the p-value above (logEL: p < 0.0001), there is strong evidence that homelessness affects chronic abesnteeism in public schools."
 ;
 
 footnote3 justify=left
@@ -186,7 +186,7 @@ footnote3 justify=left
 ;
 
 footnote4 justify=left
-"(Note: This model assumes that the relationship is generally linear, and that the errors are normally disrtibuted and vary constantly. The usual means by which to check these assumptions is to look at various diagnostic plots. While I have not included those plots here, I have assessed the validity of these assumptions and there appears to be no significant violation.)"
+"(Note: This model assumes that the relationship is generally linear, and that the errors are normally distributed and vary constantly. The usual means by which to check these assumptions is to look at various diagnostic plots. While I have not included those plots here, I have used them to assess the validity of these assumptions and there appears to be no significant violation.)"
 ;
 
 proc glm data=by_school_analytic;
@@ -229,7 +229,7 @@ footnote1 justify=left
 ;
 
 footnote2 justify=left
-"Based on the p-value above, all of which are less than 0.0001, there is strong evidence that when considered together, the rate of homelessness and the rate of English learners both have a significant effect on the rate of chronic abesnteeism in California schools."
+"Based on the p-values above, all of which are less than 0.0001, there is strong evidence that when considered together, the rate of homelessness and the rate of English learners both have a significant effect on the rate of chronic abesnteeism in California schools."
 ;
 
 footnote3 justify=left
@@ -237,11 +237,11 @@ footnote3 justify=left
 ;
 
 footnote4 justify=left
-"From these anayses it has become clear that a student's homelessness status and their ability to effecitively communicate with those around them both have an impact on the rate of chronic absenteeism a school can expect to experience. I've further found that while considering EL rates has little effect on the estimated effect of homelessness, the estimated effect of EL rates increases drastically when the two are considered rtogether."
+"From these anayses it has become clear that a student's homelessness status and their ability to effecitively communicate with those around them both have an impact on the rate of chronic absenteeism a school can expect to experience. I've further found that while considering EL rates has little effect on the estimated effect of homelessness, the estimated effect of EL rates increases drastically when the two are considered together."
 ;
 
 footnote5 justify=left
-"(Note: This model assumes that the relationship is generally linear, and that the errors are normally disrtibuted and vary constantly. The usual means by which to check these assumptions is to look at various diagnostic plots. While I have not included those plots here, I have assessed the validity of these assumptions and there appears to be no significant violation.)"
+"(Note: This model assumes that the relationship is generally linear, and that the errors are normally distributed and vary constantly. The usual means by which to check these assumptions is to look at various diagnostic plots. While I have not included those plots here, I have used them to assess the validity of these assumptions and there appears to be no significant violation.)"
 ;
 
 proc glm data=by_school_analytic;
