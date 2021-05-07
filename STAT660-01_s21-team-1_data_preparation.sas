@@ -258,7 +258,7 @@ proc sort data=fepsch19_nodups out=fepsch19_temp;
     by cdscode lc; 
 run;
 
-
+ 
 /*
 Drop irrelevant columns.
 */
@@ -421,20 +421,22 @@ proc sql;
         order by cdscode;
 quit;
 
-/* Merge all analytic files to create one final analytic file. */
+/* 
+Merge all analytic files to create one final analytic file. 
+*/
 proc sql;
     create table Whole_School_analytic_raw as
         select 
             coalesce(E.cdscode, F.cdscode, C.cdscode, EL.cdscode)
 			as CDSCode,
 			E.language as language_EL 
-            label "Language Name Spoken by the Most EL",
+            label "Language Name Spoken by the Most EL in Each School",
 			E.totalnum as total_EL 
-            label "Total Number of EL Speaking that Selected Language",
+            label "The Total Number of Language Spoken by EL",
 			F.language as language_FEP 
-            label "Language spoken by the most FEP",
+            label "Language Name Spoken by the Most FEP in Each School",
 			F.totalnum as total_FEP
-            label "Total Number of FEP Speaking that Selected Language",
+            label "The Total Number of Language Spoken by EL",
 			C.chrabsrate as chrabs_rate
 			label "Chronic Absenteeism Rate",
 			EL.type as student_type
@@ -453,11 +455,13 @@ proc sql;
 	;
 quit;
 	    
-/* check Whole_School_analytic_raw for rows whose unique id values are repeated,
+/* 
+Check Whole_School_analytic_raw for rows whose unique id values are repeated,
 missing, or correspond to non-schools, where the column CDS_Code is intended to
 be a primary key; after executing this data step, we see that the full joins
 used above introduced duplicates in Whole_School_analytic, which need to be
-mitigated before proceeding */
+mitigated before proceeding.
+*/
 data Whole_School_analytic_bad_ids;
     set Whole_School_analytic_raw;
     by CDSCode;
@@ -473,11 +477,13 @@ data Whole_School_analytic_bad_ids;
         end;
 run;
 
-/* remove duplicates from Whole_School_analytic_raw with respect to CDSCode;
+/* 
+Remove duplicates from Whole_School_analytic_raw with respect to CDSCode;
 after inspecting the rows in Whole_School_analytic_raw, we saw that either
 of the rows in duplicate-row pairs can be removed without losing values for
 analysis, so we use proc sort to indiscriminately remove duplicates, after
-which column CDS_Code is guaranteed to form a primary key */
+which column CDS_Code is guaranteed to form a primary key.
+*/
 proc sort
     nodupkey
     data=Whole_School_analytic_raw
@@ -490,6 +496,39 @@ proc sort
         substr(CDSCode,8,7) not in ("0000000","0000001")
 ;
 run;
+
+/* 
+Build a new dataset EL_FEP_analytic needed to address the first question in
+data-Analytic file. This table has been merged based on the same colummn 
+"Language" from elsch19 and fepsch19 file.
+*/
+proc sql;
+    create table EL_FEP_analytic as
+	    select coalesce(E.language, F.language) as language, E.total_EL, F.total_FEP
+        from 
+            (
+                select language_EL as language, sum(total_EL) as total_EL
+			    from Whole_School_analytic
+				where
+				    language is not null
+					and
+					total_EL is not null
+                group by language
+            ) as E
+		    inner join
+            (
+                select language_FEP as language, sum(total_FEP) as total_FEP
+			    from Whole_School_analytic
+				where
+				    language is not null
+					and
+					total_FEP is not null
+                group by language
+            ) as F
+			on E.language=F.language
+    order by language; 
+quit;
+
 
 *******************************************************************************;
 * Further Data Prepration for the Three Questions from Yale Paulsen;
