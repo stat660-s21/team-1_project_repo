@@ -15,7 +15,6 @@ answer the research questions below
 */
 %include "&path.STAT660-01_s21-team-1_data_preparation.sas";
 
-
 *******************************************************************************;
 * Research Question 1 Analysis Startinqg Point;
 *******************************************************************************;
@@ -25,6 +24,17 @@ by_school_analytic file.
 
 Limitations: Edited (4/29): This question can now be addressed using only the 
 by_school_analytic file. 
+
+Methodology: Use proc sgplot to create a scatterplot of the data. 
+Use proc glm to analyze the following model:  
+
+log(Chronic Absenteeism) = log(Homelessness)*beta_Homelessness + beta_intercept
+
+and then plot the estimated function against the scatterplot. This allows the 
+reader to easily understand the relationship being modeled.  
+
+Followup Steps: Validate model assumptions. Look at other factors that may 
+affect rates of chronic absenteeism in California. 
 */
 
 title1 justify=left
@@ -116,6 +126,18 @@ by_school_analytic file.
 
 Limitations: Edited (4/29): This question can now be addressed using only the 
 by_school_analytic file. 
+
+Methodology: Use proc sgplot to create a scatterplot of the data. Use proc glm 
+to analyze the following model:  
+
+log(Chronic Absenteeism) = log(EL Rate)*beta_EL Rate + beta_intercept
+
+and then plot the estimated function against the scatterplot. This again allows 
+the reader to easily understand the relationship being modeled. 
+
+Followup Steps: Validate model assumptions. Look at how rates of Engish 
+Learners interact with other factors that affect rates of chronic absenteeism 
+in California.
 */
 
 title1 justify=left
@@ -131,7 +153,7 @@ title3 justify=left
 ;
 
 title4 justify=left
-"Figure 2.1: log(Chronic Absenteeism) by log(Homelessness) in 4719 California Schools."
+"Figure 2.1: log(Chronic Absenteeism) by log(EL Rate) in 4719 California Schools."
 ;
 
 footnote1 justify=left
@@ -206,6 +228,23 @@ Homless_Rate in the by_school_analytic file.
 
 Limitations: Edited (4/29): This question can now be addressed using only the 
 by_school_analytic file.  
+
+Methodology: Use proc sgplot to create a scatterplot of the data. Use proc glm 
+to analyze the following model:  
+
+log(Chronic Absenteeism) = log(EL Rate)*beta_EL Rate + 
+                           log(Homelessness)*beta_Homelessness +
+                           log(EL Rate)*log(Homelessness)*beta_interaction + 
+                           beta_intercept
+
+This analysis provides better insight into the complex interactions driving 
+rates of chronic absenteeism. 
+
+Followup Steps: Validate model assumptions. Look at other factors that may 
+affect rates of chronic absenteeism in California. for example, factors such as
+drug use among students or parents, or rate of student employment, involvement 
+in extracurricular activities, and other outside factors may be responsible for
+much of the still-unexplained variation in the data.  
 */
 
 title1 justify=left
