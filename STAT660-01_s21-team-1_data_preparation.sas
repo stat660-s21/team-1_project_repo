@@ -414,9 +414,9 @@ quit;
 data ELAS_LTEL_AR_analytic(rename=(maxvar=type) drop=EO IFEP EL RFEP TBD);
     set ELAS_analytic;
         array v EO IFEP EL RFEP TBD;
-		maxvalue = max(of v(*));
+        maxvalue = max(of v(*));
         length maxvar $4.;
-		maxvar = vname(v[whichn(maxvalue, of v(*))]);    
+        maxvar = vname(v[whichn(maxvalue, of v(*))]);    
 run;
 
 /* 
@@ -450,33 +450,33 @@ proc sql;
     create table Whole_School_analytic_raw as
         select 
             coalesce(E.cdscode, F.cdscode, C.cdscode, EL.cdscode)
-			as CDSCode,
-			E.language as language_EL 
+            as CDSCode,
+            E.language as language_EL 
             label "Language Name Spoken by the Most EL",
-			E.totalnum as total_EL 
+            E.totalnum as total_EL 
             label "Total Number of EL Speaking that Selected Language",
-			F.language as language_FEP 
+            F.language as language_FEP 
             label "Language spoken by the most FEP",
-			F.totalnum as total_FEP
+            F.totalnum as total_FEP
             label "Total Number of FEP Speaking that Selected Language",
-			C.chrabsrate as chrabs_rate
-			label "Chronic Absenteeism Rate",
-			EL.type as student_type
+            C.chrabsrate as chrabs_rate
+            label "Chronic Absenteeism Rate",
+            EL.type as student_type
             label "The Most Common Type of Students"
-		from elsch_analytic as E
-		    full join
+        from elsch_analytic as E
+            full join
             fepsch_analytic as F
-			on E.cdscode=F.cdscode
-			full join
+            on E.cdscode=F.cdscode
+            full join
             Chrabs_rate_analytic as C
             on E.cdscode=C.cdscode
-			full join
-			ELAS_LTEL_AR_analytic as EL
+            full join
+            ELAS_LTEL_AR_analytic as EL
             on E.cdscode=EL.cdscode
         order by CDSCode
-	;
+    ;
 quit;
-	    
+        
 /* check Whole_School_analytic_raw for rows whose unique id values are repeated,
 missing, or correspond to non-schools, where the column CDS_Code is intended to
 be a primary key; after executing this data step, we see that the full joins
@@ -509,7 +509,7 @@ proc sort
 ;
     by CDSCode;
     where 
-	    not(missing(CDSCode))
+        not(missing(CDSCode))
         or
         substr(CDSCode,8,7) not in ("0000000","0000001")
 ;
@@ -569,7 +569,6 @@ data absentees;
         ReportingCategory
         CumulativeEnrollment
         ChronicAbsenteeismCount
-        CountyName
     ;       
 run;
 
@@ -581,7 +580,7 @@ This code sums the count of FEP and EL students within cdscodes. The result is
 a dataset with one row for each cdscode containing the sums of the values of 
 interest.
 */
-data FEPEL_counts(drop=COUNTY LC LANGUAGE TOTAL_EL TOTAL_FEP);
+data FEPEL_counts(drop=LC LANGUAGE TOTAL_EL TOTAL_FEP);
     set fepel; 
     by cdscode;
     if First.cdscode then EL_Count=0;
